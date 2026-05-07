@@ -1,0 +1,1472 @@
+Predict · HTML
+Copy
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predict — EcoSort AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00e676;
+    --green-dark: #00b248;
+    --green-glow: rgba(0,230,118,0.18);
+    --bg: #050f0a;
+    --bg2: #081a10;
+    --bg3: #0d2318;
+    --card: rgba(13,35,24,0.88);
+    --glass: rgba(0,230,118,0.06);
+    --text: #e8f5e9;
+    --muted: #7fa98a;
+    --white: #ffffff;
+    --nav-h: 72px;
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    font-family:'DM Sans',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:0; opacity:.45;
+  }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--green-dark); border-radius:3px; }
+ 
+  /* NAV */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:1000;
+    height:var(--nav-h);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 48px;
+    background:rgba(5,15,10,0.85);
+    backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(0,230,118,0.1);
+  }
+  .nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
+  .nav-logo {
+    width:42px; height:42px;
+    background:linear-gradient(135deg,var(--green),#1de9b6);
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px;
+    box-shadow:0 0 20px var(--green-glow);
+  }
+  .nav-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:800; color:var(--white); line-height:1.1; }
+  .nav-title span { color:var(--green); display:block; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; }
+  .nav-links { display:flex; align-items:center; gap:8px; list-style:none; }
+  .nav-links a { text-decoration:none; color:var(--muted); font-size:14px; font-weight:500; padding:8px 16px; border-radius:8px; transition:all 0.25s; }
+  .nav-links a:hover { color:var(--white); background:var(--glass); }
+  .nav-links .nav-cta {
+    background:var(--green); color:var(--bg) !important;
+    font-weight:700; border-radius:8px; padding:8px 20px; margin-left:8px;
+    box-shadow:0 0 16px var(--green-glow);
+  }
+  .nav-links .nav-cta:hover { background:#1de9b6; transform:translateY(-1px); }
+ 
+  /* BG FX */
+  .orb {
+    position:fixed; border-radius:50%; filter:blur(100px);
+    pointer-events:none; z-index:0;
+    animation:orbFloat 10s ease-in-out infinite alternate;
+  }
+  .orb1 { width:500px; height:500px; background:rgba(0,230,118,0.06); top:-100px; left:-100px; }
+  .orb2 { width:400px; height:400px; background:rgba(29,233,182,0.05); bottom:-80px; right:-80px; animation-delay:-5s; }
+  @keyframes orbFloat { 0%{transform:translate(0,0);} 100%{transform:translate(30px,20px);} }
+ 
+  /* MAIN */
+  main {
+    min-height:100vh;
+    padding:calc(var(--nav-h) + 60px) 24px 80px;
+    position:relative; z-index:1;
+    display:flex; flex-direction:column; align-items:center;
+  }
+ 
+  /* HEADER */
+  .page-header {
+    text-align:center; max-width:640px; margin-bottom:56px;
+    animation:fadeDown 0.7s ease both;
+  }
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+  .page-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.25);
+    color:var(--green); font-size:11px; font-weight:600; letter-spacing:2px;
+    text-transform:uppercase; padding:5px 14px; border-radius:999px;
+    margin-bottom:20px;
+  }
+  .page-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.5;transform:scale(1.4);} }
+  .page-header h1 {
+    font-family:'Syne',sans-serif; font-size:clamp(32px,5vw,56px); font-weight:800;
+    color:var(--white); line-height:1.1; margin-bottom:16px;
+  }
+  .page-header h1 span { color:var(--green); }
+  .page-header p { font-size:16px; color:var(--muted); line-height:1.7; }
+ 
+  /* PREDICT CARD */
+  .predict-wrapper {
+    max-width:760px; width:100%;
+    animation:fadeUp 0.7s 0.2s ease both;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px);} to{opacity:1;transform:translateY(0);} }
+ 
+  .predict-card {
+    background:var(--card);
+    border:1px solid rgba(0,230,118,0.15);
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 32px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,230,118,0.05);
+  }
+ 
+  .predict-card-header {
+    padding:32px 40px;
+    border-bottom:1px solid rgba(0,230,118,0.08);
+    display:flex; align-items:center; gap:16px;
+  }
+  .predict-card-header-icon {
+    width:52px; height:52px; border-radius:14px;
+    background:linear-gradient(135deg,rgba(0,230,118,0.15),rgba(29,233,182,0.08));
+    border:1px solid rgba(0,230,118,0.2);
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+    flex-shrink:0;
+  }
+  .predict-card-header h2 { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--white); margin-bottom:4px; }
+  .predict-card-header p { font-size:13px; color:var(--muted); }
+ 
+  .predict-card-body { padding:40px; }
+ 
+  /* DROP ZONE */
+  .drop-zone {
+    border:2px dashed rgba(0,230,118,0.3);
+    border-radius:20px;
+    padding:60px 40px;
+    text-align:center;
+    cursor:pointer;
+    transition:all 0.3s;
+    position:relative;
+    background:rgba(0,230,118,0.02);
+    margin-bottom:32px;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color:var(--green);
+    background:rgba(0,230,118,0.06);
+    box-shadow:0 0 40px rgba(0,230,118,0.1);
+  }
+  .drop-zone input[type=file] {
+    position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+  }
+  .drop-icon {
+    font-size:56px; margin-bottom:16px; display:block;
+    animation:dropIconFloat 3s ease-in-out infinite alternate;
+  }
+  @keyframes dropIconFloat { 0%{transform:translateY(0);} 100%{transform:translateY(-8px);} }
+  .drop-zone h3 { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; color:var(--white); margin-bottom:8px; }
+  .drop-zone p { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
+  .browse-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(0,230,118,0.12); border:1px solid rgba(0,230,118,0.3);
+    color:var(--green); font-family:'Syne',sans-serif; font-weight:700; font-size:14px;
+    padding:10px 24px; border-radius:10px; cursor:pointer;
+    transition:all 0.25s; pointer-events:none;
+  }
+  .drop-zone:hover .browse-btn {
+    background:rgba(0,230,118,0.2); border-color:var(--green);
+  }
+  .supported { font-size:11px; color:rgba(127,169,138,0.6); margin-top:12px; letter-spacing:0.5px; }
+ 
+  /* PREVIEW */
+  .preview-wrap {
+    display:none; margin-bottom:32px; animation:fadeUp 0.4s ease both;
+  }
+  .preview-wrap.show { display:block; }
+  .preview-inner {
+    border:1px solid rgba(0,230,118,0.2);
+    border-radius:16px; overflow:hidden;
+    position:relative; background:rgba(0,0,0,0.3);
+  }
+  .preview-inner img {
+    width:100%; max-height:320px; object-fit:contain; display:block;
+  }
+  .preview-overlay {
+    position:absolute; top:12px; right:12px;
+    background:rgba(5,15,10,0.85); border:1px solid rgba(0,230,118,0.2);
+    border-radius:8px; padding:6px 12px;
+    font-size:12px; color:var(--green); font-weight:600;
+    backdrop-filter:blur(8px);
+  }
+  .preview-actions {
+    padding:16px 20px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-top:1px solid rgba(0,230,118,0.1);
+  }
+  .file-info { font-size:13px; color:var(--muted); }
+  .file-info strong { color:var(--white); }
+  .remove-btn {
+    background:rgba(255,82,82,0.1); border:1px solid rgba(255,82,82,0.2);
+    color:#ff5252; font-size:12px; font-weight:600;
+    padding:6px 14px; border-radius:8px; cursor:pointer;
+    transition:all 0.2s; font-family:'DM Sans',sans-serif;
+  }
+  .remove-btn:hover { background:rgba(255,82,82,0.2); border-color:#ff5252; }
+ 
+  /* PREDICT BUTTON */
+  .predict-btn-wrap { text-align:center; }
+  .btn-predict {
+    display:inline-flex; align-items:center; gap:14px;
+    background:linear-gradient(135deg,var(--green),#1de9b6);
+    color:var(--bg);
+    font-family:'Syne',sans-serif; font-weight:800; font-size:18px;
+    padding:20px 56px; border-radius:16px; border:none; cursor:pointer;
+    box-shadow:0 0 40px rgba(0,230,118,0.4), 0 8px 32px rgba(0,0,0,0.4);
+    transition:all 0.3s; letter-spacing:0.5px;
+    position:relative; overflow:hidden; width:100%;
+    justify-content:center;
+  }
+  .btn-predict::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,0.12),transparent);
+    opacity:0; transition:opacity 0.3s;
+  }
+  .btn-predict:hover::before { opacity:1; }
+  .btn-predict:hover {
+    box-shadow:0 0 60px rgba(0,230,118,0.6), 0 12px 48px rgba(0,0,0,0.5);
+    transform:translateY(-3px) scale(1.01);
+  }
+  .btn-predict:disabled {
+    background:rgba(0,230,118,0.2); color:rgba(0,230,118,0.5);
+    cursor:not-allowed; box-shadow:none; transform:none;
+  }
+  .btn-predict:disabled:hover { transform:none; box-shadow:none; }
+  .predict-icon { font-size:24px; }
+ 
+  /* LOADING */
+  .loading-wrap {
+    display:none; padding:48px; text-align:center;
+    animation:fadeUp 0.3s ease both;
+  }
+  .loading-wrap.show { display:block; }
+  .spinner {
+    width:64px; height:64px; margin:0 auto 24px;
+    border:3px solid rgba(0,230,118,0.15);
+    border-top:3px solid var(--green);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin { to{transform:rotate(360deg);} }
+  .loading-wrap h3 { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; color:var(--white); margin-bottom:8px; }
+  .loading-wrap p { font-size:14px; color:var(--muted); }
+  .loading-dots span {
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--green); margin:0 3px;
+    animation:dotBounce 1.2s ease-in-out infinite;
+  }
+  .loading-dots span:nth-child(2) { animation-delay:0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay:0.4s; }
+  @keyframes dotBounce { 0%,100%{transform:translateY(0);opacity:1;} 50%{transform:translateY(-10px);opacity:0.4;} }
+ 
+  /* RESULT */
+  .result-wrap {
+    display:none; animation:fadeUp 0.5s ease both;
+  }
+  .result-wrap.show { display:block; }
+  .result-card {
+    background:linear-gradient(135deg,rgba(0,230,118,0.06),rgba(29,233,182,0.03));
+    border:1px solid rgba(0,230,118,0.25);
+    border-radius:20px; padding:40px;
+    text-align:center; position:relative; overflow:hidden;
+  }
+  .result-card::before {
+    content:''; position:absolute; top:-60px; left:50%; transform:translateX(-50%);
+    width:200px; height:200px;
+    background:radial-gradient(circle,rgba(0,230,118,0.12),transparent 70%);
+    pointer-events:none;
+  }
+  .result-emoji { font-size:64px; margin-bottom:16px; display:block; animation:emojiPop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes emojiPop { from{transform:scale(0);opacity:0;} to{transform:scale(1);opacity:1;} }
+  .result-label {
+    display:inline-block;
+    font-size:11px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--green); font-weight:600;
+    background:rgba(0,230,118,0.1); padding:4px 12px; border-radius:999px;
+    margin-bottom:12px;
+  }
+  .result-class {
+    font-family:'Syne',sans-serif; font-size:40px; font-weight:800;
+    color:var(--white); margin-bottom:8px; text-transform:capitalize;
+  }
+  .result-conf {
+    font-size:15px; color:var(--muted); margin-bottom:24px;
+  }
+  .result-conf strong { color:var(--green); font-size:22px; }
+ 
+  .confidence-bar-wrap { margin-bottom:24px; }
+  .confidence-bar-bg {
+    height:8px; background:rgba(0,230,118,0.1); border-radius:4px; overflow:hidden; margin-bottom:6px;
+  }
+  .confidence-bar-fill {
+    height:100%; background:linear-gradient(90deg,var(--green),#1de9b6);
+    border-radius:4px; width:0%;
+    transition:width 1.2s cubic-bezier(.4,0,.2,1);
+  }
+  .confidence-label { font-size:12px; color:var(--muted); }
+ 
+  .result-tip {
+    background:rgba(0,0,0,0.3); border:1px solid rgba(0,230,118,0.1);
+    border-radius:12px; padding:20px; margin-bottom:16px; text-align:left;
+  }
+  .result-tip h4 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--white); margin-bottom:8px; }
+  .result-tip p { font-size:13px; color:var(--muted); line-height:1.6; }
+ 
+  .result-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-again {
+    display:inline-flex; align-items:center; gap:8px;
+    background:transparent; border:1px solid rgba(0,230,118,0.3);
+    color:var(--green); font-family:'Syne',sans-serif; font-weight:700; font-size:14px;
+    padding:12px 28px; border-radius:12px; cursor:pointer;
+    transition:all 0.25s; text-decoration:none;
+  }
+  .btn-again:hover { background:var(--glass); border-color:var(--green); transform:translateY(-2px); }
+ 
+  /* HOW IT WORKS */
+  .how-it-works {
+    max-width:760px; width:100%; margin-top:40px;
+    animation:fadeUp 0.7s 0.4s ease both;
+  }
+  .hiw-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .hiw-card {
+    background:var(--card); border:1px solid rgba(0,230,118,0.1);
+    border-radius:16px; padding:24px; text-align:center;
+    transition:all 0.3s;
+  }
+  .hiw-card:hover { border-color:rgba(0,230,118,0.25); transform:translateY(-4px); }
+  .hiw-num {
+    font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+    color:var(--green); letter-spacing:2px; text-transform:uppercase; margin-bottom:12px;
+  }
+  .hiw-icon { font-size:32px; margin-bottom:12px; display:block; }
+  .hiw-card h4 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--white); margin-bottom:6px; }
+  .hiw-card p { font-size:12px; color:var(--muted); line-height:1.6; }
+ 
+  @media(max-width:768px) {
+    nav { padding:0 20px; }
+    .nav-links { display:none; }
+    main { padding:calc(var(--nav-h) + 32px) 16px 60px; }
+    .predict-card-body { padding:24px; }
+    .predict-card-header { padding:24px; }
+    .drop-zone { padding:40px 20px; }
+    .hiw-grid { grid-template-columns:1fr; }
+    .btn-predict { font-size:16px; padding:18px 32px; }
+  }
+ 
+  /* INFO NOTE */
+  .info-note {
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:rgba(0,230,118,0.08);
+    border:1px solid rgba(0,230,118,0.25);
+    border-left:4px solid var(--green);
+    padding:16px 18px;
+    border-radius:12px;
+    margin-bottom:24px;
+    animation:fadeUp 0.5s ease both;
+  }
+  .info-icon { font-size:20px; margin-top:2px; }
+  .info-note p { font-size:13px; color:var(--muted); line-height:1.6; }
+  .info-note .highlight { color:var(--green); font-weight:700; }
+ 
+  /* FOOTER */
+  .footer {
+    margin-top:80px;
+    padding:40px 20px 20px;
+    background:rgba(0,0,0,0.4);
+    border-top:1px solid rgba(0,230,118,0.1);
+    backdrop-filter:blur(10px);
+  }
+  .footer-content {
+    max-width:1100px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:20px;
+  }
+  .footer-brand { display:flex; align-items:center; gap:12px; }
+  .footer-logo {
+    width:42px; height:42px;
+    background:linear-gradient(135deg,var(--green),#1de9b6);
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px;
+    box-shadow:0 0 15px var(--green-glow);
+  }
+  .footer-brand h3 { font-family:'Syne',sans-serif; font-size:16px; color:var(--white); }
+  .footer-brand p { font-size:12px; color:var(--muted); }
+  .footer-links { display:flex; gap:20px; }
+  .footer-links a { text-decoration:none; font-size:13px; color:var(--muted); transition:0.2s; }
+  .footer-links a:hover { color:var(--green); }
+  .footer-bottom { text-align:center; margin-top:20px; font-size:12px; color:rgba(127,169,138,0.6); }
+ 
+  .flash-message {
+    padding:14px 18px;
+    border-radius:12px;
+    margin-bottom:20px;
+    font-size:14px;
+    font-weight:500;
+    border-left:4px solid var(--green);
+    background:rgba(0,230,118,0.08);
+    color:var(--text);
+    animation:fadeUp 0.4s ease;
+  }
+  .flash-message.warning { border-left-color:#ff9800; background:rgba(255,152,0,0.08); }
+  .flash-message.danger { border-left-color:#ff5252; background:rgba(255,82,82,0.08); }
+  .flash-message.success { border-left-color:var(--green); }
+ 
+  /* ═══════════════════════════════════════════
+     KNOW MORE BUTTON
+  ═══════════════════════════════════════════ */
+  .know-more-btn {
+    display:inline-flex; align-items:center; gap:10px;
+    width:100%;
+    background:linear-gradient(135deg, rgba(0,230,118,0.08), rgba(29,233,182,0.04));
+    border:1px solid rgba(0,230,118,0.3);
+    color:var(--green);
+    font-family:'Syne',sans-serif; font-weight:700; font-size:13px;
+    padding:13px 20px; border-radius:12px; cursor:pointer;
+    transition:all 0.3s;
+    letter-spacing:0.5px;
+    margin-top:12px;
+    position:relative;
+    overflow:hidden;
+    justify-content:center;
+  }
+  .know-more-btn::before {
+    content:'';
+    position:absolute; left:-100%; top:0; bottom:0; width:100%;
+    background:linear-gradient(90deg, transparent, rgba(0,230,118,0.08), transparent);
+    transition:left 0.5s ease;
+  }
+  .know-more-btn:hover::before { left:100%; }
+  .know-more-btn:hover {
+    background:linear-gradient(135deg, rgba(0,230,118,0.15), rgba(29,233,182,0.08));
+    border-color:var(--green);
+    box-shadow:0 0 20px rgba(0,230,118,0.15), 0 4px 16px rgba(0,0,0,0.3);
+    transform:translateY(-2px);
+  }
+  .know-more-btn .btn-arrow {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; border-radius:50%;
+    background:rgba(0,230,118,0.15);
+    font-size:14px;
+    transition:transform 0.3s;
+  }
+  .know-more-btn:hover .btn-arrow { transform:translateX(3px); }
+  .know-more-pulse {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--green);
+    animation:pulse 1.5s infinite;
+    flex-shrink:0;
+  }
+ 
+  /* ═══════════════════════════════════════════
+     MODAL OVERLAY
+  ═══════════════════════════════════════════ */
+  .modal-overlay {
+    position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,0.85);
+    backdrop-filter:blur(16px);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.35s ease;
+  }
+  .modal-overlay.open {
+    opacity:1; pointer-events:all;
+  }
+ 
+  .modal-box {
+    background:linear-gradient(160deg, #0d2318, #081a10);
+    border:1px solid rgba(0,230,118,0.2);
+    border-radius:28px;
+    width:100%; max-width:780px;
+    max-height:88vh;
+    overflow:hidden;
+    display:flex; flex-direction:column;
+    box-shadow:0 40px 120px rgba(0,0,0,0.8), 0 0 80px rgba(0,230,118,0.08);
+    transform:translateY(32px) scale(0.96);
+    transition:transform 0.35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .modal-overlay.open .modal-box {
+    transform:translateY(0) scale(1);
+  }
+ 
+  .modal-header {
+    padding:28px 32px 24px;
+    border-bottom:1px solid rgba(0,230,118,0.1);
+    display:flex; align-items:center; gap:16px;
+    flex-shrink:0;
+    background:linear-gradient(135deg, rgba(0,230,118,0.06), transparent);
+  }
+  .modal-header-emoji {
+    font-size:48px;
+    filter:drop-shadow(0 0 12px rgba(0,230,118,0.4));
+    animation:emojiPop 0.5s 0.1s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .modal-header-text { flex:1; }
+  .modal-header-text h2 {
+    font-family:'Syne',sans-serif; font-size:24px; font-weight:800;
+    color:var(--white); margin-bottom:4px; text-transform:capitalize;
+  }
+  .modal-header-text p { font-size:13px; color:var(--muted); }
+  .modal-close {
+    width:40px; height:40px; border-radius:12px;
+    background:rgba(255,82,82,0.1); border:1px solid rgba(255,82,82,0.2);
+    color:#ff5252; font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s; flex-shrink:0;
+  }
+  .modal-close:hover { background:rgba(255,82,82,0.2); transform:rotate(90deg); }
+ 
+  /* TAB SWITCHER */
+  .modal-tabs {
+    display:flex; gap:0; padding:20px 32px 0;
+    flex-shrink:0;
+  }
+  .tab-btn {
+    flex:1; padding:12px 16px;
+    background:transparent;
+    border:1px solid rgba(0,230,118,0.15);
+    color:var(--muted); font-family:'Syne',sans-serif; font-weight:700; font-size:13px;
+    cursor:pointer; transition:all 0.25s;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    letter-spacing:0.5px;
+  }
+  .tab-btn:first-child { border-radius:12px 0 0 12px; border-right:none; }
+  .tab-btn:last-child { border-radius:0 12px 12px 0; }
+  .tab-btn.active {
+    background:linear-gradient(135deg, rgba(0,230,118,0.15), rgba(29,233,182,0.08));
+    border-color:rgba(0,230,118,0.4);
+    color:var(--green);
+    box-shadow:0 0 20px rgba(0,230,118,0.1);
+  }
+  .tab-btn:hover:not(.active) { color:var(--text); background:rgba(0,230,118,0.04); }
+ 
+  /* STEPS CONTAINER */
+  .modal-body {
+    padding:28px 32px 32px;
+    overflow-y:auto; flex:1;
+  }
+  .modal-body::-webkit-scrollbar { width:4px; }
+  .modal-body::-webkit-scrollbar-thumb { background:rgba(0,230,118,0.3); border-radius:2px; }
+ 
+  .steps-panel { display:none; }
+  .steps-panel.active { display:block; animation:fadeUp 0.3s ease both; }
+ 
+  .steps-intro {
+    font-size:13px; color:var(--muted); line-height:1.7;
+    padding:14px 18px;
+    background:rgba(0,230,118,0.04);
+    border:1px solid rgba(0,230,118,0.1);
+    border-radius:10px;
+    margin-bottom:24px;
+  }
+ 
+  /* STEP ITEMS */
+  .step-list { display:flex; flex-direction:column; gap:16px; }
+  .step-item {
+    display:flex; gap:20px; align-items:flex-start;
+    padding:20px;
+    background:rgba(0,0,0,0.25);
+    border:1px solid rgba(0,230,118,0.08);
+    border-radius:16px;
+    transition:all 0.3s;
+    opacity:0; transform:translateX(-12px);
+    animation:stepSlideIn 0.4s ease forwards;
+  }
+  .step-item:hover {
+    border-color:rgba(0,230,118,0.2);
+    background:rgba(0,230,118,0.03);
+    transform:translateX(4px);
+  }
+ 
+  @keyframes stepSlideIn {
+    to { opacity:1; transform:translateX(0); }
+  }
+  .step-item:nth-child(1) { animation-delay:0.05s; }
+  .step-item:nth-child(2) { animation-delay:0.1s; }
+  .step-item:nth-child(3) { animation-delay:0.15s; }
+  .step-item:nth-child(4) { animation-delay:0.2s; }
+  .step-item:nth-child(5) { animation-delay:0.25s; }
+  .step-item:nth-child(6) { animation-delay:0.3s; }
+  .step-item:nth-child(7) { animation-delay:0.35s; }
+  .step-item:nth-child(8) { animation-delay:0.4s; }
+ 
+  .step-num-wrap {
+    flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .step-num {
+    width:36px; height:36px; border-radius:10px;
+    background:linear-gradient(135deg, rgba(0,230,118,0.2), rgba(29,233,182,0.1));
+    border:1px solid rgba(0,230,118,0.3);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-size:14px; font-weight:800;
+    color:var(--green);
+    flex-shrink:0;
+  }
+  .step-connector {
+    width:2px; flex:1; min-height:16px;
+    background:linear-gradient(to bottom, rgba(0,230,118,0.2), transparent);
+    border-radius:1px;
+  }
+  .step-item:last-child .step-connector { display:none; }
+ 
+  .step-content { flex:1; padding-top:6px; }
+  .step-title {
+    font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+    color:var(--white); margin-bottom:6px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .step-title .step-icon { font-size:16px; }
+  .step-desc {
+    font-size:13px; color:var(--muted); line-height:1.7;
+  }
+  .step-tag {
+    display:inline-block; margin-top:8px;
+    font-size:10px; letter-spacing:1px; text-transform:uppercase; font-weight:600;
+    color:var(--green); background:rgba(0,230,118,0.08);
+    border:1px solid rgba(0,230,118,0.2);
+    padding:3px 10px; border-radius:999px;
+  }
+ 
+  /* PRO TIP BLOCK */
+  .pro-tip-block {
+    margin-top:20px; padding:16px 20px;
+    background:linear-gradient(135deg, rgba(0,230,118,0.08), rgba(29,233,182,0.04));
+    border:1px solid rgba(0,230,118,0.2);
+    border-left:4px solid var(--green);
+    border-radius:12px;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .pro-tip-block .tip-icon { font-size:20px; flex-shrink:0; margin-top:2px; }
+  .pro-tip-block p { font-size:12px; color:var(--muted); line-height:1.6; }
+  .pro-tip-block strong { color:var(--green); }
+</style>
+</head>
+<body>
+ 
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash-message {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+  {% endwith %}
+ 
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+ 
+<!-- NAVBAR -->
+<nav>
+  <a class="nav-brand" href="home.html">
+    <div class="nav-logo">♻️</div>
+    <div class="nav-title">EcoSort<em style="font-style:normal;color:var(--green)"> AI</em><span>Garbage Classification</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="{{ url_for('home') }}">Home</a></li>
+    <li><a href="{{ url_for('home') }}#features">About</a></li>
+    <li><a href="{{ url_for('home') }}#classes">Resources</a></li>
+    <li><a href="{{ url_for('home') }}#recycling">Contact Us</a></li>
+    <li><a href="{{ url_for('logout') }}" class="nav-cta">LogOut</a></li>
+  </ul>
+</nav>
+ 
+<main>
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-badge">🤖 AI Prediction Engine</div>
+    <h1>Classify Your <span>Garbage</span></h1>
+    <p>Upload any image of waste and our deep learning model will identify its category instantly — helping you dispose of it the right way.</p>
+  </div>
+ 
+  <!-- PREDICT CARD -->
+  <div class="predict-wrapper">
+    <div class="predict-card">
+      <div class="predict-card-header">
+        <div class="predict-card-header-icon">🔬</div>
+        <div>
+          <h2>Upload & Predict</h2>
+          <p>Supports JPG, PNG, WEBP • Max 10MB • Instant results</p>
+        </div>
+      </div>
+      <div class="predict-card-body" id="upload-section">
+ 
+        <!-- INFO NOTE -->
+        <div class="info-note">
+          <span class="info-icon">ℹ️</span>
+          <p>
+            <strong>Note:</strong> In our classification system,
+            <span class="highlight">Biological</span> and
+            <span class="highlight">Organic</span> are treated as the
+            <strong>same category</strong>.
+            So if your result shows either one, both represent biodegradable waste like food, plants, and natural materials.
+          </p>
+        </div>
+ 
+        <!-- DROP ZONE -->
+        <div class="drop-zone" id="dropZone">
+          <form method="POST" action="{{ url_for('predict') }}" enctype="multipart/form-data">
+            <input type="file" name="image" id="fileInput" accept="image/*">
+            <span class="drop-icon">📸</span>
+            <h3>Drop your image here</h3>
+            <p>Drag & drop a photo of your waste item, or click to browse from your device</p>
+            <div class="browse-btn">📁 Browse Files</div>
+            <div class="supported">Supported: JPG · PNG · WEBP · GIF</div>
+          </div>
+ 
+          <!-- PREVIEW -->
+          <div class="preview-wrap" id="previewWrap">
+            <div class="preview-inner">
+              <img id="previewImg" src="" alt="Preview">
+              <div class="preview-overlay">✅ Image Ready</div>
+            </div>
+            <div class="preview-actions">
+              <div class="file-info">File: <strong id="fileName">-</strong> &nbsp;|&nbsp; Size: <strong id="fileSize">-</strong></div>
+              <button class="remove-btn" id="removeBtn">✕ Remove</button>
+            </div>
+          </div>
+ 
+          <!-- PREDICT BUTTON -->
+          <div class="predict-btn-wrap" id="predictBtnWrap">
+            <button type="submit" class="btn-predict" id="predictBtn" disabled>
+              <span class="predict-icon">🧠</span>
+              <span>Predict Garbage Type</span>
+            </button>
+          </div>
+        </form>
+      </div>
+ 
+      <!-- LOADING -->
+      <div class="loading-wrap" id="loadingWrap">
+        <div class="spinner"></div>
+        <h3>Analysing your image...</h3>
+        <p>Our AI model is classifying the waste type</p>
+        <div class="loading-dots" style="margin-top:12px;">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+ 
+      {% if image_path %}
+      <div class="preview-wrap show">
+        <div class="preview-inner">
+          <img src="{{ image_path }}" alt="Uploaded Image">
+        </div>
+      </div>
+      {% endif %}
+ 
+      <!-- RESULT -->
+      {% if prediction %}
+      <div class="result-wrap show">
+        <div class="predict-card-body">
+          <div class="result-card">
+ 
+            <span class="result-emoji">{{ emoji }}</span>
+            <div class="result-label">Classification Result</div>
+ 
+            <div class="result-class">{{ prediction.replace('-', ' ') }}</div>
+ 
+            <div class="result-conf">
+              Confidence: <strong>{{ confidence }}%</strong>
+            </div>
+ 
+            <div class="confidence-bar-wrap">
+              <div class="confidence-bar-bg">
+                <div class="confidence-bar-fill" style="width: {{ confidence }}%;"></div>
+              </div>
+              <div class="confidence-label">Model confidence score</div>
+            </div>
+ 
+            <!-- Disposal Tip -->
+            <div class="result-tip">
+              <h4>♻️ Disposal Tips</h4>
+              <ul>
+                {% for tip in disposal_tip.split('\n') %}
+                  <li>{{ tip.replace('•','') }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+ 
+            <!-- KNOW MORE: DISPOSAL -->
+            <button class="know-more-btn" onclick="openModal('{{ prediction }}', 'dispose')">
+              <span class="know-more-pulse"></span>
+              🗑️ Know How to Dispose — Step by Step
+              <span class="btn-arrow">→</span>
+            </button>
+ 
+            <!-- Recycle Tip -->
+            <div class="result-tip" style="margin-top:16px;">
+              <h4>🎨 Recycle / Craft Ideas</h4>
+              <ul>
+                {% for tip in recycle_tip.split('\n') %}
+                  <li>{{ tip.replace('•','') }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+ 
+            <!-- KNOW MORE: RECYCLE -->
+            <button class="know-more-btn" onclick="openModal('{{ prediction }}', 'recycle')" style="margin-bottom:24px;">
+              <span class="know-more-pulse"></span>
+              🎨 Know How to Recycle / Craft — Step by Step
+              <span class="btn-arrow">→</span>
+            </button>
+ 
+            <div class="result-actions">
+              <a href="{{ url_for('predict') }}" class="btn-again">🔄 Try Another Image</a>
+              <a href="{{ url_for('home') }}#classes" class="btn-again">📖 View All Classes</a>
+            </div>
+ 
+          </div>
+        </div>
+      </div>
+      {% endif %}
+ 
+    </div><!-- /predict-card -->
+ 
+    <!-- HOW IT WORKS -->
+    <div class="how-it-works">
+      <div style="text-align:center; margin-bottom:28px;">
+        <div class="page-badge">Guide</div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--white);margin-top:12px;">How it works</h2>
+      </div>
+      <div class="hiw-grid">
+        <div class="hiw-card">
+          <div class="hiw-num">Step 01</div>
+          <span class="hiw-icon">📷</span>
+          <h4>Upload Image</h4>
+          <p>Take or select a clear photo of any waste item from your device.</p>
+        </div>
+        <div class="hiw-card">
+          <div class="hiw-num">Step 02</div>
+          <span class="hiw-icon">🧠</span>
+          <h4>AI Analysis</h4>
+          <p>Our CNN model processes the image and identifies key visual patterns.</p>
+        </div>
+        <div class="hiw-card">
+          <div class="hiw-num">Step 03</div>
+          <span class="hiw-icon">♻️</span>
+          <h4>Get Result</h4>
+          <p>Receive the waste class, confidence score, and recycling guidance.</p>
+        </div>
+      </div>
+    </div>
+ 
+  </div><!-- /predict-wrapper -->
+</main>
+ 
+<!-- ═══════════════════════════════════════════════
+     KNOW MORE MODAL
+═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="knowMoreModal" onclick="handleOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-emoji" id="modalEmoji">♻️</div>
+      <div class="modal-header-text">
+        <h2 id="modalTitle">Class Name</h2>
+        <p id="modalSubtitle">Complete step-by-step guide</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+ 
+    <div class="modal-tabs">
+      <button class="tab-btn active" id="tabDispose" onclick="switchTab('dispose')">🗑️ Disposal Guide</button>
+      <button class="tab-btn" id="tabRecycle" onclick="switchTab('recycle')">🎨 Recycle / Craft</button>
+    </div>
+ 
+    <div class="modal-body">
+      <!-- DISPOSE PANEL -->
+      <div class="steps-panel active" id="panel-dispose">
+        <div class="steps-intro" id="dispose-intro">Loading...</div>
+        <div class="step-list" id="dispose-steps"></div>
+        <div class="pro-tip-block" id="dispose-protip" style="display:none;">
+          <span class="tip-icon">💡</span>
+          <p id="dispose-protip-text"></p>
+        </div>
+      </div>
+      <!-- RECYCLE PANEL -->
+      <div class="steps-panel" id="panel-recycle">
+        <div class="steps-intro" id="recycle-intro">Loading...</div>
+        <div class="step-list" id="recycle-steps"></div>
+        <div class="pro-tip-block" id="recycle-protip" style="display:none;">
+          <span class="tip-icon">✨</span>
+          <p id="recycle-protip-text"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-brand">
+      <div class="footer-logo">♻️</div>
+      <div>
+        <h3>EcoSort AI</h3>
+        <p>Smart Waste Classification for a Greener Future</p>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('home') }}#features">About</a>
+      <a href="{{ url_for('home') }}#classes">Resources</a>
+      <a href="{{ url_for('home') }}#recycling">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 EcoSort AI • Built for a Sustainable Planet 🌍</div>
+</footer>
+ 
+<script>
+  /* ─────────────────────────────────────────────
+     FILE UPLOAD LOGIC (unchanged)
+  ───────────────────────────────────────────── */
+  let selectedFile = null;
+  const dropZone     = document.getElementById('dropZone');
+  const fileInput    = document.getElementById('fileInput');
+  const previewWrap  = document.getElementById('previewWrap');
+  const previewImg   = document.getElementById('previewImg');
+  const fileName     = document.getElementById('fileName');
+  const fileSize     = document.getElementById('fileSize');
+  const removeBtn    = document.getElementById('removeBtn');
+  const predictBtn   = document.getElementById('predictBtn');
+  const loadingWrap  = document.getElementById('loadingWrap');
+  const uploadSection = document.getElementById('upload-section');
+ 
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1024/1024).toFixed(1) + ' MB';
+  }
+ 
+  function handleFile(file) {
+    if (!file || !file.type.startsWith('image/')) { alert('Please upload an image file.'); return; }
+    if (file.size > 10*1024*1024) { alert('File size must be under 10MB.'); return; }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImg.src = e.target.result;
+      previewWrap.classList.add('show');
+      fileName.textContent = file.name;
+      fileSize.textContent = formatSize(file.size);
+      predictBtn.disabled = false;
+      dropZone.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+ 
+  if (fileInput) fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+  if (dropZone) {
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+  }
+  if (removeBtn) {
+    removeBtn.addEventListener('click', () => {
+      selectedFile = null; previewImg.src = ''; previewWrap.classList.remove('show');
+      dropZone.style.display = ''; predictBtn.disabled = true; fileInput.value = '';
+    });
+  }
+ 
+  /* ─────────────────────────────────────────────
+     STEP-BY-STEP DATA FOR ALL 13 CLASSES
+  ───────────────────────────────────────────── */
+  const CLASS_STEPS = {
+ 
+    'plastic': {
+      emoji: '🧴',
+      dispose: {
+        intro: 'Plastic takes up to 1,000 years to decompose. Correct disposal ensures it gets recycled rather than ending up in oceans or landfills.',
+        steps: [
+          { icon: '🔍', title: 'Check the Resin Code', desc: 'Look at the bottom of the plastic item for a number (1–7) inside the recycling triangle. Codes 1 (PET) and 2 (HDPE) are most widely accepted curbside.', tag: 'Identify First' },
+          { icon: '🚿', title: 'Rinse the Container', desc: 'Wash out any food, liquid, or residue. Even a quick rinse counts — contaminated plastics often get rejected at sorting facilities.', tag: 'Clean It' },
+          { icon: '🪄', title: 'Remove Labels & Lids', desc: 'Peel off paper labels when possible. Check your local council — some accept lids separately, others want them removed entirely.', tag: 'Prep It' },
+          { icon: '🗜️', title: 'Crush & Flatten', desc: 'Squash bottles and containers flat to save space in your recycling bin and reduce transport costs.', tag: 'Compact It' },
+          { icon: '🗑️', title: 'Sort by Type', desc: 'Keep plastics together and separate from glass, paper, and metal. Never mix plastic bags with rigid plastics — bags need separate drop-off points.', tag: 'Sort It' },
+          { icon: '🚚', title: 'Place in Recycling Bin', desc: 'Put cleaned, sorted plastic in your yellow/blue recycling bin. For plastic bags and film, take to a dedicated collection point at supermarkets.', tag: 'Dispose' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Plastic bags and wrappers (film plastics) are NOT accepted in most curbside bins. Collect them in a bag and drop off at your nearest supermarket collection point.'
+      },
+      recycle: {
+        intro: 'Plastic is incredibly versatile for creative reuse. Before tossing it, see if you can give it a second life at home!',
+        steps: [
+          { icon: '🌱', title: 'Bottle Planter', desc: 'Cut a large plastic bottle in half. Use the bottom as a planter for herbs, succulents, or small flowers. Poke drainage holes at the base.', tag: 'Garden Craft' },
+          { icon: '🖊️', title: 'Pencil Holder', desc: 'Clean a short, sturdy plastic container (like a yogurt tub). Decorate it with paint, washi tape, or fabric for a desk organizer.', tag: 'Desk Craft' },
+          { icon: '💧', title: 'Self-Watering System', desc: 'Poke a small hole in a bottle cap and fill the bottle with water, then invert it into a plant pot — creates a slow-drip irrigation system for your plants.', tag: 'Functional Reuse' },
+          { icon: '🐦', title: 'Bird Feeder', desc: 'Cut two windows in a large bottle, insert a wooden spoon as a perch and seed tray, fill with bird seed, and hang from a tree.', tag: 'Nature Craft' },
+          { icon: '🎨', title: 'Piggy Bank or Coin Jar', desc: 'Cut a slot in a bottle cap area, seal the bottom end, and decorate to make a fun savings jar for coins.', tag: 'Kids Craft' }
+        ],
+        protip: '<strong>Creative Tip:</strong> Plastic bottle caps can be collected and sent to charities that melt them down to make wheelchairs. Search for a cap collection program in your area!'
+      }
+    },
+ 
+    'paper': {
+      emoji: '📄',
+      dispose: {
+        intro: 'Paper is one of the easiest materials to recycle, but moisture and contamination are its biggest enemies. Follow these steps for proper disposal.',
+        steps: [
+          { icon: '🔍', title: 'Identify the Paper Type', desc: 'Newspapers, cardboard, office paper, and magazines are all recyclable. Wax-coated paper, tissue paper, and paper towels are NOT — they go in general waste.', tag: 'Check First' },
+          { icon: '🌵', title: 'Keep It Dry', desc: 'Wet paper fibres break down and cannot be recycled. Store paper waste in a dry place and never leave recycling bins uncovered in rain.', tag: 'Critical Step' },
+          { icon: '✂️', title: 'Remove Non-Paper Parts', desc: 'Tear out plastic windows from envelopes. Remove spiral wire bindings from notebooks. Peel off plastic coatings where possible.', tag: 'Prep It' },
+          { icon: '📦', title: 'Stack or Bundle', desc: 'Fold and stack newspapers or magazines neatly. Bundle them with string or put them loose in a paper bag — never in a plastic bag.', tag: 'Bundle It' },
+          { icon: '🍕', title: 'Check for Food Grease', desc: 'Pizza boxes with heavy grease staining should be torn — the clean top half goes in recycling, the greasy bottom goes in compost or general waste.', tag: 'Contamination Check' },
+          { icon: '♻️', title: 'Place in Paper Recycling', desc: 'Put clean, dry, sorted paper in your paper recycling bin or take to a paper bank. Shredded paper should go in a paper bag before placing in the bin.', tag: 'Done!' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Food-contaminated paper (like greasy napkins or used paper towels) belongs in your compost or food waste bin, not recycling — contaminated paper ruins entire batches at recycling plants.'
+      },
+      recycle: {
+        intro: 'Paper has incredible potential for art, organisation, and creative projects. Here\'s how to repurpose it beautifully.',
+        steps: [
+          { icon: '📒', title: 'Make a Notebook', desc: 'Stack clean paper sheets, fold in half, and staple along the spine. Add a cardboard cover decorated with wrapping paper or drawings.', tag: 'Stationery' },
+          { icon: '🎁', title: 'Gift Wrapping', desc: 'Use old newspapers, magazine pages, or coloured scrap paper as eco-friendly wrapping paper. Stamp it with potato prints for a personalised look.', tag: 'Gift Craft' },
+          { icon: '🌸', title: 'Paper Flowers', desc: 'Cut circles or petal shapes from colourful magazine pages. Layer them from large to small and secure with a brad fastener through the centre.', tag: 'Decoration' },
+          { icon: '📦', title: 'Paper Mâché Projects', desc: 'Tear paper into strips, soak in a water-flour paste mixture, and layer over a balloon or mould. Let dry completely to create bowls, masks, or sculptures.', tag: 'Art Project' },
+          { icon: '🗒️', title: 'Seedling Pots', desc: 'Roll newspaper around a cylindrical object and fold the base shut. Fill with compost for biodegradable seedling pots you can plant directly in soil.', tag: 'Garden Craft' }
+        ],
+        protip: '<strong>Creative Tip:</strong> Old newspapers make excellent drawer liners, shelf liners, and pet cage flooring — extending their useful life before recycling.'
+      }
+    },
+ 
+    'cardboard': {
+      emoji: '📦',
+      dispose: {
+        intro: 'Cardboard is highly recyclable and one of the most recovered materials globally. Just a few simple steps make all the difference.',
+        steps: [
+          { icon: '📏', title: 'Break Down All Boxes', desc: 'Flatten every box completely. This is the most important step — full boxes waste enormous space in collection trucks and often cause processing jams.', tag: 'Step One Always' },
+          { icon: '🗜️', title: 'Remove Tape & Staples', desc: 'Peel off packing tape (plastic tape does not biodegrade). Remove staples with pliers if possible. Stickers and labels can stay.', tag: 'Prep It' },
+          { icon: '🍕', title: 'Check for Food Contamination', desc: 'Pizza boxes, food delivery boxes — if heavily soaked in grease or food residue, they cannot be recycled. Tear off any clean sections for recycling and compost the dirty parts.', tag: 'Food Check' },
+          { icon: '🌧️', title: 'Keep Cardboard Dry', desc: 'Wet cardboard breaks down and loses structural integrity making it unrecyclable. Store it indoors or in a covered bin until collection day.', tag: 'Moisture Alert' },
+          { icon: '🚫', title: 'Do Not Include Waxed Cardboard', desc: 'Juice cartons and wax-coated food packaging look like cardboard but require separate specialist processing. Check your local authority\'s guidelines.', tag: 'Exception Rule' },
+          { icon: '♻️', title: 'Place in Recycling Collection', desc: 'Stack flattened cardboard neatly beside your recycling bin if it\'s too large to fit inside, or take large quantities directly to a cardboard drop-off point.', tag: 'Done!' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Many moving companies, community Facebook groups, and schools actively seek clean cardboard boxes — give them a new life before recycling them!'
+      },
+      recycle: {
+        intro: 'Cardboard is a crafter\'s best friend — sturdy, flexible, and free! Here are brilliant ways to reuse it creatively.',
+        steps: [
+          { icon: '🏠', title: 'Build a Cardboard City', desc: 'Large boxes become houses, castles, or rockets for kids. Cut doors and windows, paint the outside, and create an entire city from delivery boxes.', tag: 'Kids Project' },
+          { icon: '📚', title: 'Magazine File / Desk Organiser', desc: 'Cut a large cereal box diagonally at an angle. Cover with paper or fabric for a stylish magazine holder or desk file organiser.', tag: 'Organisation' },
+          { icon: '🌱', title: 'Garden Weed Suppressor', desc: 'Lay flattened cardboard directly on garden beds before adding mulch. It blocks weeds, retains moisture, and biodegrades naturally — no chemicals needed.', tag: 'Garden Hack' },
+          { icon: '🎭', title: 'Costume Armour & Props', desc: 'Cut and shape cardboard into shields, armour, helmets, and swords. Paint with metallic spray paint for impressive DIY cosplay or Halloween costumes.', tag: 'Creative Costume' },
+          { icon: '🗃️', title: 'Storage Dividers', desc: 'Cut strips of cardboard and slot them together in a grid to create drawer dividers for organising socks, cutlery, craft supplies, or jewellery.', tag: 'Home Hack' }
+        ],
+        protip: '<strong>Creative Tip:</strong> Corrugated cardboard makes excellent texture stamps — cut shapes from it and use the ridged side dipped in paint for beautiful textured art prints.'
+      }
+    },
+ 
+    'metal': {
+      emoji: '🥫',
+      dispose: {
+        intro: 'Metal recycling saves up to 95% of the energy needed to produce new aluminium. Proper disposal keeps this incredible resource in circulation forever.',
+        steps: [
+          { icon: '🔍', title: 'Identify the Metal Type', desc: 'Common household metals: aluminium cans (drinks), steel cans (food tins), aerosol cans, and foil. All are recyclable when clean and dry.', tag: 'Identify' },
+          { icon: '🚿', title: 'Rinse All Containers', desc: 'Wash out cans, tins, and foil trays thoroughly. Food residue causes contamination at recycling plants and attracts pests in your bin.', tag: 'Clean It' },
+          { icon: '⚠️', title: 'Handle Aerosols Carefully', desc: 'Ensure aerosol cans are completely empty before recycling. NEVER puncture or crush them — residual pressure can be dangerous. Most councils accept them when fully empty.', tag: 'Safety First' },
+          { icon: '🗜️', title: 'Crush Aluminium Cans', desc: 'Crush aluminium cans flat to save space. Note: do NOT crush steel cans as it can interfere with sorting machines at recycling facilities.', tag: 'Compact It' },
+          { icon: '🍫', title: 'Check Foil Items', desc: 'Scrunch clean foil into a ball at least the size of your fist before recycling — small foil pieces fall through sorting machinery and are lost. Foil contaminated with food goes in general waste.', tag: 'Foil Rule' },
+          { icon: '♻️', title: 'Place in Metal / Mixed Recycling', desc: 'Put all clean, dry metal items in your recycling bin. Take larger metal items (pots, pans, appliances) to a local household recycling centre or scrap metal dealer.', tag: 'Done!' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Aluminium is infinitely recyclable — it can be melted down and remade indefinitely without quality loss. A recycled can is back on the shelf in as little as 60 days!'
+      },
+      recycle: {
+        intro: 'Metal cans and foil are wonderfully strong and shapeable. Give them a new purpose before they go to the recycler.',
+        steps: [
+          { icon: '🕯️', title: 'Tin Can Lanterns', desc: 'Fill a clean tin can with water, freeze solid, then hammer nail holes in patterns. The ice prevents the tin from bending. Thaw, dry, and place a tea light inside for beautiful lanterns.', tag: 'Home Decor' },
+          { icon: '🌿', title: 'Herb Garden Pots', desc: 'Clean small tin cans (like tomato paste cans), punch drainage holes in the bottom, and use them as adorable pots for growing kitchen herbs on a windowsill.', tag: 'Garden Craft' },
+          { icon: '✏️', title: 'Desk Organiser Set', desc: 'Group several tin cans of varying sizes, wrap them in twine, fabric, or chalk paint, and bind together. Perfect for holding pens, scissors, and brushes.', tag: 'Organisation' },
+          { icon: '🎵', title: 'Musical Instrument', desc: 'Fill tin cans with different amounts of dried beans or rice, seal with duct tape, and decorate to make a shaker or maracas — great for kids\' music activities.', tag: 'Kids Craft' },
+          { icon: '🗝️', title: 'Wall-Mounted Key Holder', desc: 'Attach small tin cans horizontally to a wooden board using screws. Paint it, hang it by the door, and use the cans as hooks or holders for keys and small items.', tag: 'DIY Functional' }
+        ],
+        protip: '<strong>Creative Tip:</strong> Tin can lids can be upcycled into decorative wind chimes, mosaic pieces, or stamping tools for art projects.'
+      }
+    },
+ 
+    'glass': {
+      emoji: '🫙',
+      dispose: {
+        intro: 'Glass is 100% recyclable and can be recycled endlessly without quality loss. Separating it correctly makes a huge difference.',
+        steps: [
+          { icon: '🎨', title: 'Sort by Colour', desc: 'Separate glass into clear, green, and brown. Glass recyclers melt by colour — mixed colours produce weaker, inferior glass.', tag: 'Sort First' },
+          { icon: '🚿', title: 'Rinse Thoroughly', desc: 'Wash out all bottles and jars. Remove food, drink residues, and corks. Labels can stay on — they are removed during processing.', tag: 'Clean It' },
+          { icon: '🪄', title: 'Remove Lids & Caps', desc: 'Remove all metal and plastic lids and caps. These go in separate recycling streams (metal or plastic). Cork stoppers are compostable.', tag: 'Prep It' },
+          { icon: '⚠️', title: 'Never Break Glass Intentionally', desc: 'Do not smash glass before recycling — broken glass is dangerous to recycling workers and harder to sort. Place items whole in the bank or bin.', tag: 'Safety Rule' },
+          { icon: '🚫', title: 'Know What Cannot Go In', desc: 'Pyrex, ceramics, mirrors, window glass, and light bulbs are NOT recyclable in glass banks — they have different melting points and contaminate batches. Wrap and put in general waste.', tag: 'Exceptions' },
+          { icon: '♻️', title: 'Take to a Glass Bank', desc: 'Most household collections don\'t take glass kerbside. Find your nearest bottle bank or glass recycling point and sort by colour into the correct container.', tag: 'Done!' }
+        ],
+        protip: '<strong>Pro Tip:</strong> One contaminated item (like a ceramic mug) can ruin an entire load of glass recyclate. When in doubt, leave it out of the glass bank.'
+      },
+      recycle: {
+        intro: 'Glass jars and bottles are beautiful upcycle candidates — their durability and clarity make them perfect for dozens of creative projects.',
+        steps: [
+          { icon: '🕯️', title: 'Candle Holders & Vases', desc: 'Clean glass jars make stunning candle holders. Wrap with twine, paint frosted with glass paint, or leave clear and fill with pebbles and water for a flower vase.', tag: 'Home Decor' },
+          { icon: '🍯', title: 'Food Storage Jars', desc: 'Reuse glass jars with tight-fitting lids for storing dried foods, spices, coffee, or homemade jams. They\'re superior to plastic as they don\'t absorb odours.', tag: 'Kitchen Reuse' },
+          { icon: '🌱', title: 'Propagation Station', desc: 'Fill a clear glass bottle with water and place plant cuttings inside to root. Position near a window and watch the roots grow — it\'s both functional and decorative.', tag: 'Garden Craft' },
+          { icon: '🎁', title: 'Gift in a Jar', desc: 'Layer cookie or brownie mix ingredients in a glass jar with a handwritten recipe tag tied with ribbon. A beautiful, zero-waste gift idea for any occasion.', tag: 'Gift Idea' },
+          { icon: '🔦', title: 'Fairy Light Lanterns', desc: 'Wrap copper wire fairy lights around or inside a glass jar, add a ribbon handle, and hang for magical ambient lighting at parties or in the garden.', tag: 'Lighting Craft' }
+        ],
+        protip: '<strong>Creative Tip:</strong> Etching cream from craft stores lets you add frosted patterns or names to glass jars and bottles — making unique personalised gifts or home décor.'
+      }
+    },
+ 
+    'white-glass': {
+      emoji: '🫙',
+      dispose: {
+        intro: 'Clear/white glass is the most valuable glass for recycling as it can be turned into any colour. Handle it with care and sort it correctly.',
+        steps: [
+          { icon: '🔍', title: 'Confirm It Is Clear Glass', desc: 'Hold the item up to light — truly clear (colourless) glass transmits light easily. Do not mix with green or brown glass as it affects the quality of the recycled material.', tag: 'Verify' },
+          { icon: '🚿', title: 'Rinse the Container', desc: 'Remove all food, oils, or drink residue. Even small amounts of vinegar or sauce can affect the recycling process.', tag: 'Clean It' },
+          { icon: '🔩', title: 'Remove Metal & Plastic Parts', desc: 'Take off any metal lids, plastic pourers (like in olive oil bottles), rubber seals, or decorative corks. These all go in separate streams.', tag: 'Disassemble' },
+          { icon: '⚠️', title: 'Avoid Breaking It', desc: 'Keep clear glass whole until it reaches the recycling point. Broken glass pieces are hazardous and hard to sort by colour accurately.', tag: 'Handle Safely' },
+          { icon: '🚫', title: 'Exclude Non-Container Glass', desc: 'Drinking glasses, crystal glassware, and Pyrex oven dishes are made with different compositions and cannot go in bottle banks. Donate usable items to charity instead.', tag: 'Exclusions' },
+          { icon: '♻️', title: 'Deposit at Clear Glass Section', desc: 'Use the CLEAR/WHITE labelled container at your nearest bottle bank or glass collection point. Correct colour sorting significantly improves recycled glass quality.', tag: 'Done!' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Clear glass jars and bottles in good condition can be donated to food banks, community kitchens, or zero-waste shops for people to refill with bulk goods.'
+      },
+      recycle: {
+        intro: 'Clear glass has a beautiful transparency that makes it ideal for light-focused crafts and practical home projects.',
+        steps: [
+          { icon: '🌸', title: 'Terrarium Garden', desc: 'Place pebbles at the bottom of a wide-mouth clear jar for drainage, add potting mix, then plant small succulents, mosses, or ferns. A self-contained garden world.', tag: 'Garden Craft' },
+          { icon: '🕯️', title: 'Oil Candle', desc: 'Fill a clear glass bottle or jar with cooking oil, thread a cotton wick through a metal tab, and float it in the oil. Trimmed wick creates a long-burning, safe candle.', tag: 'Ambient Lighting' },
+          { icon: '🎨', title: 'Painted Storage Jars', desc: 'Paint the inside of clear jars with chalk paint or glass paint in any colour. Once dry, use as bathroom organisers for cotton balls, hair clips, or bath salts.', tag: 'Bathroom Craft' },
+          { icon: '🌊', title: 'Decorative Sand Art', desc: 'Layer coloured sand, pebbles, shells, and small objects in a clear bottle to create layered sand art — a beautiful, tactile decoration.', tag: 'Decoration' },
+          { icon: '🔬', title: 'Science Jar Projects', desc: 'Use clear jars for classic science experiments: density columns (oil, water, corn syrup), erupting volcanoes, or ant farms. Educational and endlessly reusable.', tag: 'Educational' }
+        ],
+        protip: '<strong>Creative Tip:</strong> Clear glass bottles filled with water and food colouring make stunning window ornaments — the light refracts through the coloured water creating beautiful rainbow effects.'
+      }
+    },
+ 
+    'brown-glass': {
+      emoji: '🍺',
+      dispose: {
+        intro: 'Brown glass (also called amber glass) is produced in large volumes from beer and certain food bottles. Sorting it separately preserves its value.',
+        steps: [
+          { icon: '🍺', title: 'Confirm the Brown/Amber Colour', desc: 'Brown glass has a warm amber to dark brown tint — most commonly beer bottles and some pharmaceutical bottles. Do not mix with green or clear glass at the bank.', tag: 'Identify' },
+          { icon: '🚿', title: 'Empty and Rinse Well', desc: 'Beer residue and yeast can cause strong smells and contaminate recycling bins. Rinse beer bottles with a little hot water, swirl and pour out.', tag: 'Clean It' },
+          { icon: '🔩', title: 'Remove Caps and Seals', desc: 'Remove metal bottle caps (they go in metal recycling) and any foil necks or plastic pour-spouts. Cork and rubber stoppers are generally compostable.', tag: 'Disassemble' },
+          { icon: '📏', title: 'Leave Labels On', desc: 'Paper labels are fine to leave on — recycling facilities use furnaces that burn them off during processing. Removing them wastes your time and water.', tag: 'Time Saver' },
+          { icon: '⚠️', title: 'Do Not Crush or Break', desc: 'Keep brown glass intact. Broken glass is dangerous for recycling workers and harder to accurately colour-sort at facilities.', tag: 'Safety' },
+          { icon: '♻️', title: 'Use the Brown Section at the Bottle Bank', desc: 'Always place brown/amber glass in the BROWN designated container at your local bottle bank. Correct colour separation ensures the recycled glass is high-quality.', tag: 'Done!' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Brown glass has natural UV-filtering properties — this is why beer, medicines, and certain foods are bottled in brown glass. This makes clean brown glass bottles especially valuable for refilling homemade drinks or storing homemade remedies.'
+      },
+      recycle: {
+        intro: 'The warm tones of brown glass make it uniquely beautiful for crafts. Its UV-blocking quality also gives it practical reuse value.',
+        steps: [
+          { icon: '🌿', title: 'Herb & Oil Storage', desc: 'Clean brown glass bottles are perfect for storing homemade infused oils, vinegars, or herbal tinctures — the brown glass protects contents from light degradation.', tag: 'Kitchen Reuse' },
+          { icon: '🕯️', title: 'Bottle Torch / Tiki Light', desc: 'Fill a brown beer bottle with torch fuel (available at hardware stores), fit a metal wick holder in the neck, add a cotton wick, and you have a beautiful outdoor garden torch.', tag: 'Garden Lighting' },
+          { icon: '🌱', title: 'Bottle Vase', desc: 'Brown glass bottles make beautiful minimalist vases. Fill with dried pampas grass, cotton branches, or eucalyptus for a natural, earthy home decoration.', tag: 'Home Decor' },
+          { icon: '🎨', title: 'Painted Bottle Art', desc: 'Paint the outside of brown glass bottles with chalk paint — white or cream looks stunning. Add painted patterns or simply leave matte for a modern farmhouse aesthetic.', tag: 'Decoration' },
+          { icon: '🧪', title: 'Soap Dispenser', desc: 'Remove the original label, clean thoroughly, add a pump dispenser top (widely available online), and fill with hand soap or dish soap for a rustic countertop dispenser.', tag: 'Functional Craft' }
+        ],
+        protip: '<strong>Creative Tip:</strong> A collection of brown glass bottles of different sizes grouped together on a shelf, with dried wildflowers, creates a striking, zero-cost boho shelf display.'
+      }
+    },
+ 
+    'green-glass': {
+      emoji: '🟢',
+      dispose: {
+        intro: 'Green glass — common in wine and condiment bottles — must be separated from other glass colours to maintain recycling quality.',
+        steps: [
+          { icon: '🍷', title: 'Confirm It Is Green Glass', desc: 'Green glass ranges from pale mint to deep emerald. Wine bottles, pickle jars, and some water bottles are typically green. Separate from clear and brown glass.', tag: 'Identify' },
+          { icon: '🚿', title: 'Rinse Completely', desc: 'Pour out any remaining liquid and rinse with cold water. Wine and vinegar residue can cause strong odours in collection vehicles and contaminate batches.', tag: 'Clean It' },
+          { icon: '🪄', title: 'Remove Corks & Caps', desc: 'Pull out corks (they are compostable or recyclable through specialist schemes). Remove metal screw caps and foil neck wrappings separately.', tag: 'Prep It' },
+          { icon: '📏', title: 'Leave Labels — They\'re Fine', desc: 'Paper wine labels can stay on — they combust in the high-temperature recycling furnace and cause no problems. Saves water and effort.', tag: 'Time Saver' },
+          { icon: '🚫', title: 'Exclude Decorative Green Glass', desc: 'Coloured glass decorations, drinking glasses, and glass ornaments are not suitable for bottle banks. Donate usable decorative glass to charity shops.', tag: 'Exceptions' },
+          { icon: '♻️', title: 'Deposit at Green Section', desc: 'Place whole green glass bottles in the GREEN container at your nearest bottle bank. Some councils collect green glass kerbside — check your local guidelines.', tag: 'Done!' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Cork from wine bottles can be collected and recycled through specialist cork recycling points (often found in wine shops). Corks can also be composted or used for craft projects.'
+      },
+      recycle: {
+        intro: 'Green glass has a beautiful depth of colour that lends itself to stunning home and garden projects.',
+        steps: [
+          { icon: '🍷', title: 'Wine Bottle Candle Holder', desc: 'Insert a taper candle directly into the neck of a clean wine bottle. The bottle acts as an elegant, weighted holder. Group several in a line for a dinner table centrepiece.', tag: 'Table Decor' },
+          { icon: '🌿', title: 'Self-Watering Plant Irrigator', desc: 'Fill a wine bottle with water, cap it, flip upside down, and press the neck into a plant pot. Water seeps out slowly as the soil dries, keeping plants hydrated while you\'re away.', tag: 'Garden Hack' },
+          { icon: '🎭', title: 'Mosaic Art', desc: 'Break green glass safely (wrapped in cloth, use safety goggles) into small pieces and use them in mosaic art — flowerpots, stepping stones, or picture frames.', tag: 'Advanced Craft' },
+          { icon: '🏮', title: 'Solar Garden Light', desc: 'Place a solar-powered LED light (from a garden stake) inside a green wine bottle and bury the stake in a garden bed. The bottle glows beautifully at night.', tag: 'Garden Lighting' },
+          { icon: '🔔', title: 'Wind Chime', desc: 'Score and cut wine bottles into tubes using a bottle cutter, sand edges smooth, and hang at different lengths on a frame with fishing line for a melodic, glass wind chime.', tag: 'Sound Craft' }
+        ],
+        protip: '<strong>Creative Tip:</strong> A bottle cutter (inexpensive tool) can score glass bottles neatly so you can create drinking glasses, bowls, or vase shapes from old wine bottles with smooth, polished edges.'
+      }
+    },
+ 
+    'biological': {
+      emoji: '🌿',
+      dispose: {
+        intro: 'Biological waste is nature\'s most efficient recycler — when handled correctly, it becomes rich fertiliser instead of methane-producing landfill waste.',
+        steps: [
+          { icon: '🔍', title: 'Identify Biological Waste', desc: 'This includes: food scraps, vegetable peelings, fruit waste, cooked food leftovers, tea bags, coffee grounds, eggshells, garden waste, and biodegradable paper.', tag: 'What Qualifies' },
+          { icon: '🪣', title: 'Use a Kitchen Caddy', desc: 'Keep a small countertop caddy or bin liner in your kitchen for daily food scraps. Empty it every 2–3 days into your main outdoor food waste bin to prevent odours.', tag: 'Collect Daily' },
+          { icon: '🚫', title: 'Avoid These Common Mistakes', desc: 'Do NOT add meat, fish, or dairy to home compost — it attracts pests. These items should go in council food waste collections only (if offered). No oils, fats, or liquids either.', tag: 'Important Exclusions' },
+          { icon: '🌍', title: 'Council Food Waste Collection', desc: 'If your local council offers a food waste kerbside collection, use the provided caddy and approved compostable liners. Put it out on collection day — it goes to industrial composting or anaerobic digestion.', tag: 'Council Collection' },
+          { icon: '🌱', title: 'Set Up a Home Compost Bin', desc: 'If you have a garden, a compost bin is the best option. Balance "greens" (food waste, grass clippings) with "browns" (cardboard, dry leaves) in roughly a 1:2 ratio.', tag: 'Home Compost' },
+          { icon: '♻️', title: 'Compost or Biogas — Not Landfill', desc: 'Biological waste in landfill creates methane — a gas 80× more potent than CO₂. Even small actions like using a food caddy can dramatically reduce your carbon footprint.', tag: 'Why It Matters' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Adding a layer of cardboard or dry leaves to your compost bin every time you add food scraps prevents flies, reduces odour, and speeds up decomposition.'
+      },
+      recycle: {
+        intro: 'Biological waste transforms into something truly valuable — rich compost that feeds gardens, reduces waste, and closes the nutrient loop in nature.',
+        steps: [
+          { icon: '🪣', title: 'Start a Compost Heap or Bin', desc: 'Choose a shaded, well-drained spot in the garden. Add a mix of greens (vegetable scraps, coffee grounds) and browns (dry leaves, torn cardboard). No bin needed — a simple pile works.', tag: 'Getting Started' },
+          { icon: '🔄', title: 'Turn It Regularly', desc: 'Every 1–2 weeks, use a fork to turn and aerate the compost. Oxygen speeds up decomposition. A well-turned heap can produce compost in as little as 6–8 weeks.', tag: 'Maintain It' },
+          { icon: '💧', title: 'Keep It Moist', desc: 'Compost should feel like a wrung-out sponge — moist but not soggy. If it\'s too dry, add water or more food scraps. If it\'s too wet, add more dry browns like cardboard.', tag: 'Monitor Moisture' },
+          { icon: '🌱', title: 'Use Finished Compost', desc: 'When compost is dark, crumbly, and earthy-smelling (usually 2–6 months), it\'s ready. Dig it into garden beds, sprinkle around plants as mulch, or mix into potting soil.', tag: 'Harvest & Use' },
+          { icon: '🐛', title: 'Try Worm Farming', desc: 'A wormery (vermicomposter) is perfect for flats and small spaces. Red worms consume food scraps and produce worm castings — one of the most nutrient-rich composts available.', tag: 'Apartment Option' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Coffee grounds are rich in nitrogen and are loved by worms. Sprinkle them directly around acid-loving plants like blueberries and azaleas as a natural fertiliser booster.'
+      }
+    },
+ 
+    'organic': {
+      emoji: '🍂',
+      dispose: {
+        intro: 'Organic waste (treated same as biological) is nature\'s gift to soil. Every scrap of organic matter has the potential to feed the earth rather than filling a landfill.',
+        steps: [
+          { icon: '🍂', title: 'What Is Organic Waste?', desc: 'Fallen leaves, garden clippings, plant trimmings, fruit peels, vegetable scraps, stale bread, eggshells, coffee grounds, and tea leaves all qualify as organic waste.', tag: 'Definition' },
+          { icon: '🗑️', title: 'Separate From General Waste', desc: 'Use a dedicated organic/food waste bin with biodegradable liner bags. Never mix organic waste with plastics, metals, or batteries — it makes composting impossible.', tag: 'Segregation' },
+          { icon: '🌧️', title: 'Manage Garden Waste', desc: 'Grass clippings, hedge trimmings, and fallen leaves can be composted directly in your garden. Pile them up in a corner and they will break down naturally over time.', tag: 'Garden Waste' },
+          { icon: '📅', title: 'Use Council Collection', desc: 'Many councils collect garden and food waste separately. Place organic waste in the designated bin on collection day. Check if your area offers separate food caddy collections.', tag: 'Council Services' },
+          { icon: '⚡', title: 'Anaerobic Digestion', desc: 'Industrial organic waste collection often goes to anaerobic digestion plants — a process that generates biogas (used for electricity and heat) and digestate (used as fertiliser). A brilliant circular system.', tag: 'Industrial Process' },
+          { icon: '🚫', title: 'Never Burn Garden Waste', desc: 'Open burning of organic waste produces harmful particulates and carbon monoxide. Composting or council collection is always the better environmental choice.', tag: 'Avoid This' }
+        ],
+        protip: '<strong>Pro Tip:</strong> "Chop and drop" gardening means cutting spent plants and leaving them on the soil surface to decompose naturally — free fertiliser and improved soil structure with zero effort.'
+      },
+      recycle: {
+        intro: 'Organic waste becomes the foundation of a thriving garden. Turn your kitchen and garden scraps into something genuinely valuable.',
+        steps: [
+          { icon: '🍃', title: 'Leaf Mould Mulch', desc: 'Collect autumn leaves in black bin bags, wet them thoroughly, pierce a few air holes, and leave for 1–2 years. The result is leaf mould — a fantastic soil conditioner and mulch.', tag: 'Simple Recycling' },
+          { icon: '🐛', title: 'Wormery for Organic Scraps', desc: 'A tiered worm bin converts organic kitchen waste into worm castings and liquid fertiliser. Perfect for flats. Feed worms in small amounts every few days.', tag: 'Compact Option' },
+          { icon: '🌻', title: 'Bokashi Fermentation', desc: 'Bokashi is a Japanese composting system that ferments ALL food waste (including meat and dairy) using special microbes. It processes in 2 weeks and produces pre-compost and liquid fertiliser.', tag: 'Advanced Method' },
+          { icon: '🌱', title: 'Nutrient Tea', desc: 'Steep fresh comfrey leaves, seaweed, or nettles in a bucket of water for 2–4 weeks. Dilute the resulting "tea" 1:10 with water for a free, organic liquid plant fertiliser.', tag: 'Garden Boost' },
+          { icon: '🏡', title: 'Community Composting', desc: 'If you don\'t have garden space, find a local community composting scheme, allotment, or community garden that accepts organic waste. Your scraps feed communal growing spaces.', tag: 'Community Action' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Banana peels buried near rose bushes release potassium as they decompose — a natural organic fertiliser that promotes vibrant blooms and strong stem growth.'
+      }
+    },
+ 
+    'battery': {
+      emoji: '🔋',
+      dispose: {
+        intro: '⚠️ NEVER put batteries in general waste or recycling bins. Batteries contain toxic heavy metals that leach into soil and groundwater — and can cause fires in bin lorries.',
+        steps: [
+          { icon: '⚠️', title: 'NEVER Put Batteries in Regular Bins', desc: 'This is the most critical rule. Batteries in landfill leach lead, mercury, cadmium, and lithium into soil and water. In recycling trucks, lithium batteries have caused fatal fires.', tag: 'Critical Warning' },
+          { icon: '📦', title: 'Store Safely Until Drop-Off', desc: 'Collect used batteries in a small container at home. Cover the terminals of lithium batteries with tape to prevent short-circuits. Keep in a cool, dry place away from flammable materials.', tag: 'Safe Storage' },
+          { icon: '🔍', title: 'Identify the Battery Type', desc: 'AA, AAA, 9V, button cells, rechargeable Li-ion (phone/laptop batteries), car batteries — each has specific recycling streams. Most household batteries go to the same collection points.', tag: 'Identify Type' },
+          { icon: '🏪', title: 'Find a Collection Point', desc: 'Supermarkets, electronics stores, DIY stores, and libraries often have battery collection bins at the entrance. Search your local council website for the nearest drop-off point.', tag: 'Find a Point' },
+          { icon: '🚗', title: 'Car Batteries — Specialist Route', desc: 'Lead-acid car batteries must go to a garage, scrap metal dealer, or household recycling centre. NEVER dispose of them with household waste. Most battery retailers accept old ones when you buy new.', tag: 'Car Battery Rule' },
+          { icon: '📱', title: 'Phone & Laptop Batteries', desc: 'Electronics retailers and manufacturers often have take-back schemes for device batteries. Remove them from devices where possible before recycling the device separately.', tag: 'Device Batteries' }
+        ],
+        protip: '<strong>Safety Tip:</strong> If a battery is bulging, leaking, or smells strange, place it in a sealed plastic bag and take it immediately to a hazardous waste facility. Do not attempt to handle a damaged lithium battery if it is hot.'
+      },
+      recycle: {
+        intro: 'Batteries cannot be crafted into home projects — their materials are hazardous. But here\'s how their materials are professionally recovered and reused.',
+        steps: [
+          { icon: '🔬', title: 'What Happens at Battery Recycling?', desc: 'Batteries are first sorted by type, then shredded or smelted. The process separates metals like lithium, cobalt, nickel, and lead which are then refined and sold back to battery manufacturers.', tag: 'The Process' },
+          { icon: '🔋', title: 'Recovered Materials', desc: 'From a Li-ion battery: lithium carbonate (new batteries), cobalt (new batteries + electronics), nickel (stainless steel), copper (wiring), and aluminium (packaging).', tag: 'Recovered Materials' },
+          { icon: '🌱', title: 'Reduce Battery Use', desc: 'Switch to rechargeable batteries (NiMH type) — they can be recharged 500–1000 times, eliminating the need for hundreds of single-use batteries.', tag: 'Best Prevention' },
+          { icon: '☀️', title: 'Invest in Solar-Powered Devices', desc: 'Solar-powered garden lights, calculators, and outdoor devices eliminate battery use entirely. A long-term craft/garden investment with zero battery waste.', tag: 'Battery-Free Swap' },
+          { icon: '🔌', title: 'USB & Rechargeable Alternatives', desc: 'For remotes, toys, and torches, invest in USB-rechargeable versions. Many modern AA/AAA batteries now have a built-in micro-USB port for direct recharging — brilliant and waste-reducing.', tag: 'Modern Swap' }
+        ],
+        protip: '<strong>Important Note:</strong> Do not attempt to disassemble batteries for DIY craft projects — they contain toxic and potentially explosive materials. Leave battery recycling entirely to certified professionals.'
+      }
+    },
+ 
+    'shoes': {
+      emoji: '👟',
+      dispose: {
+        intro: 'Shoes are complex composites of rubber, leather, foam, and synthetic textiles. Proper disposal ensures they get reused, repurposed, or recycled responsibly.',
+        steps: [
+          { icon: '👀', title: 'Assess the Condition First', desc: 'Check honestly: are these shoes still wearable? Even tired-looking shoes with life left should go through donation routes rather than disposal. Only truly worn-out shoes need the recycling route.', tag: 'Condition Check' },
+          { icon: '❤️', title: 'Donate Wearable Shoes', desc: 'Take wearable shoes to charity shops, clothing banks, or community donation drives. Many charities ship donated footwear to communities in need around the world.', tag: 'Donate First' },
+          { icon: '🏪', title: 'Brand Take-Back Schemes', desc: 'Several major brands (Nike, Adidas, Timberland) run shoe recycling programmes. Nike\'s "Reuse-A-Shoe" grinds old trainers into Nike Grind material used for sports surfaces.', tag: 'Brand Schemes' },
+          { icon: '🧵', title: 'Textile Recycling Banks', desc: 'Many clothing banks (the large bins in car parks) accept old shoes tied together in pairs. They are processed into industrial wiping cloths, insulation, and new textile products.', tag: 'Textile Bank' },
+          { icon: '🗑️', title: 'Last Resort — General Waste', desc: 'If shoes are completely unusable and no recycling option is available locally, they go in general waste. Tie laces together and bag them to prevent them separating in the waste stream.', tag: 'Last Resort' },
+          { icon: '🔍', title: 'Find a Specialist Recycler', desc: 'Search for shoe recycling programmes in your area. Some councils accept shoes at household recycling centres. "Soles4Souls" and similar charities also operate global shoe collection programmes.', tag: 'Research Options' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Shoes should always be donated in pairs — odd shoes have very limited reuse value. Tie laces together or use a rubber band to keep pairs together when donating.'
+      },
+      recycle: {
+        intro: 'Old shoes, especially with their varied textures and shapes, are surprisingly versatile for creative and garden projects.',
+        steps: [
+          { icon: '🌸', title: 'Shoe Planter', desc: 'Old Wellington boots, trainers, or ankle boots make quirky garden planters. Poke drainage holes in the sole, fill with compost, and plant herbs, succulents, or trailing flowers.', tag: 'Garden Craft' },
+          { icon: '🖼️', title: 'Wall Art Display', desc: 'Arrange a collection of colourful old shoes on a painted wooden board as an eclectic wall art installation. Quirky, personal, and completely unique to your story.', tag: 'Art Display' },
+          { icon: '🎀', title: 'Shoe Laces Repurposing', desc: 'Remove laces from worn shoes and repurpose them as plant ties in the garden, craft ties for bundles, gift wrapping ribbon, or woven into bracelets and keyrings.', tag: 'Accessory Craft' },
+          { icon: '🐦', title: 'Bird House from Boots', desc: 'A sturdy old boot with a hole cut near the toe can be stuffed with moss and nesting materials then hung on a tree as an quirky bird nesting box.', tag: 'Nature Craft' },
+          { icon: '✂️', title: 'Rubber Sole Projects', desc: 'The rubber soles of worn shoes can be cut into non-slip pads for furniture legs, kneeling pads for gardening, or textured stamp tools for craft projects.', tag: 'Material Reuse' }
+        ],
+        protip: '<strong>Creative Tip:</strong> Vintage shoe lasts (the wooden moulds used in shoe making) can sometimes be found at charity shops and make stunning decorative bookends or shelf ornaments — the eco-friendly way to style a home.'
+      }
+    },
+ 
+    'clothes': {
+      emoji: '👕',
+      dispose: {
+        intro: 'Textiles are one of the world\'s most landfilled materials. Every piece of clothing has multiple better options than general waste — find the right one.',
+        steps: [
+          { icon: '👀', title: 'Honest Condition Assessment', desc: 'Sort clothes into three piles: (1) still wearable → donate/sell, (2) too worn but intact → textile recycling, (3) completely unusable/contaminated → last resort general waste.', tag: 'Sort First' },
+          { icon: '❤️', title: 'Donate Wearable Clothes', desc: 'Charity shops, clothing banks, community exchanges, Facebook groups, and apps like Vinted or Depop all give wearable clothing a second life. Wash items first — charities appreciate it.', tag: 'Donate / Sell' },
+          { icon: '🏭', title: 'Textile Recycling Banks', desc: 'For unwearable clothing, use textile recycling banks (often in supermarket or car park locations). Clothes are shredded into industrial wiping cloths, insulation material, or reprocessed into new yarn.', tag: 'Textile Bank' },
+          { icon: '🏪', title: 'Fashion Brand Take-Back', desc: 'Many fashion brands (H&M, Zara, Marks & Spencer, Patagonia) have in-store clothing collection points. They either resell, repurpose, or recycle items — check your favourite brands\' websites.', tag: 'Brand Schemes' },
+          { icon: '🧵', title: 'Repair Before Disposing', desc: 'A missing button, broken zip, or small tear is easy and cheap to repair. Many communities have repair cafes offering free mending sessions. Extending garment life is the greenest option of all.', tag: 'Repair First' },
+          { icon: '🚫', title: 'NEVER Put Clothes in Regular Recycling', desc: 'Textiles jam sorting machinery at recycling facilities and contaminate entire loads. Clothes always go to charity, textile banks, or general waste — never in your kerbside recycling bin.', tag: 'Critical Rule' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Clothes swapping events (in communities, workplaces, and online) are one of the most sustainable options — items find new owners without any industrial processing needed at all.'
+      },
+      recycle: {
+        intro: 'Old clothes are treasure troves of fabric, buttons, zips, and material. Before discarding, see what you can transform.',
+        steps: [
+          { icon: '🧴', title: 'Cleaning Rags', desc: 'Cut worn-out T-shirts, towels, and cotton items into squares for use as reusable cleaning cloths, dusters, and polishing rags. Replaces disposable paper towels permanently.', tag: 'Practical Reuse' },
+          { icon: '🛍️', title: 'Tote Bag from T-Shirt', desc: 'Cut off the sleeves and neckline of a T-shirt, then cut fringe strips along the bottom and tie them together — a no-sew tote bag in under 10 minutes.', tag: 'No-Sew Craft' },
+          { icon: '🧵', title: 'Patchwork Projects', desc: 'Cut fabric from old clothing into squares or shapes for patchwork quilts, cushion covers, or wall hangings. A beautiful way to preserve the memory of meaningful garments.', tag: 'Textile Craft' },
+          { icon: '🌱', title: 'Garden Fabric Uses', desc: 'Old denim and cotton can be cut into strips as plant ties in the garden. Worn socks filled with soap make great cleaning scrubbers. Old jumpers become great frost protection wraps for young plants.', tag: 'Garden Reuse' },
+          { icon: '🐻', title: 'Stuffed Toys / Pet Beds', desc: 'Stuff old T-shirts and jumpers inside a sewn fabric shell to create soft toys for children or comfortable beds for pets. Meaningful, soft, and completely free.', tag: 'Comfort Craft' }
+        ],
+        protip: '<strong>Creative Tip:</strong> Denim from old jeans is one of the most versatile craft fabrics — sturdy, shapeable, and beautiful. Old jeans can be transformed into bags, pouches, aprons, pot holders, and even rugs.'
+      }
+    },
+ 
+    'trash': {
+      emoji: '🗑️',
+      dispose: {
+        intro: 'General waste (trash) is anything that cannot be recycled, composted, or donated. The goal is to minimise this category as much as possible.',
+        steps: [
+          { icon: '🔍', title: 'Double-Check Before Discarding', desc: 'Before placing anything in general waste, ask: Can this be recycled? Donated? Composted? Many items people throw away have proper recycling routes — do a quick check.', tag: 'Last Resort Check' },
+          { icon: '🛍️', title: 'Use Bin Liners', desc: 'Line your general waste bin with a bin bag to keep the bin clean and make disposal more hygienic. Standard black or coloured bin liners are appropriate — not compostable bags (these need industrial composting).', tag: 'Containment' },
+          { icon: '📦', title: 'Compact Waste to Save Space', desc: 'Flatten boxes, crush cartons, and compress packaging before bagging to reduce the number of bin collections needed and lower transport emissions.', tag: 'Reduce Volume' },
+          { icon: '⚠️', title: 'Hazardous Items Require Special Routes', desc: 'Even in "trash", some items need special handling: batteries, medicines, sharps (needles), paint, chemicals, and electronics must NEVER go in general waste bins — they need specialist disposal.', tag: 'Hazardous Exception' },
+          { icon: '📅', title: 'Put Out on Collection Day', desc: 'Place your general waste bin out on the correct day according to your local council schedule. Overfull bins may not be collected — contact the council if capacity is an issue.', tag: 'Collection Day' },
+          { icon: '🌱', title: 'Reduce Future Trash', desc: 'The best long-term strategy is to reduce what enters the trash bin at source: buy less packaging, choose products with recyclable materials, repair rather than replace, and buy second-hand.', tag: 'Prevention' }
+        ],
+        protip: '<strong>Pro Tip:</strong> Keep a simple list on your fridge of what CAN and CANNOT be recycled in your area. Most contamination in recycling bins comes from well-meaning but misinformed attempts to recycle items that cannot be processed locally.'
+      },
+      recycle: {
+        intro: 'While "trash" by definition has fewer recycling options, there are still ways to reduce what ends up in landfill and extract value from seemingly worthless items.',
+        steps: [
+          { icon: '🔄', title: 'Waste Audit', desc: 'For one week, keep a list of everything you throw in the bin. Identify the top 5 items and research whether alternatives (reusable, recyclable, or compostable versions) exist for each one.', tag: 'Identify Patterns' },
+          { icon: '📦', title: 'Reuse Packaging Creatively', desc: 'Bubble wrap, foam pieces, packing peanuts, and paper stuffing from deliveries can be saved and reused for your own packages. Offer them on local community exchange groups.', tag: 'Reuse Packaging' },
+          { icon: '🛒', title: 'Switch to Reusables', desc: 'Replace the biggest contributors to your trash bin: single-use bags → reusable bags, disposable coffee cups → travel mug, cling film → beeswax wraps, paper towels → cloth rags.', tag: 'Systemic Switch' },
+          { icon: '🏪', title: 'Zero-Waste Shops', desc: 'Many towns now have refill shops where you bring your own containers for dry goods, cleaning products, and toiletries — drastically cutting packaging waste at source.', tag: 'Shopping Change' },
+          { icon: '📱', title: 'Freecycle & Give-Away Groups', desc: 'Before labelling something as trash, post it on Freecycle, Nextdoor, Facebook Marketplace, or Gumtree. One person\'s junk is genuinely another\'s treasure — it\'s a free, zero-effort way to divert waste from landfill.', tag: 'Community Reuse' }
+        ],
+        protip: '<strong>Mindset Tip:</strong> Zero waste isn\'t about achieving a perfect empty bin — it\'s about consistently making choices that reduce what goes in it. Even reducing your trash by 20% has a meaningful impact.'
+      }
+    }
+  };
+ 
+  /* ─────────────────────────────────────────────
+     MODAL LOGIC
+  ───────────────────────────────────────────── */
+  let currentClass = null;
+  let currentTab = 'dispose';
+ 
+  function openModal(className, tab) {
+    // Normalise class name (handle Flask template passing e.g. 'white-glass')
+    currentClass = className.toLowerCase().trim();
+    currentTab = tab || 'dispose';
+ 
+    const data = CLASS_STEPS[currentClass];
+    if (!data) return;
+ 
+    // Set header
+    document.getElementById('modalEmoji').textContent = data.emoji;
+    document.getElementById('modalTitle').textContent = currentClass.replace(/-/g,' ');
+    document.getElementById('modalSubtitle').textContent = 'Step-by-step guide for ' + currentClass.replace(/-/g,' ') + ' waste';
+ 
+    // Render both panels
+    renderPanel('dispose', data.dispose);
+    renderPanel('recycle', data.recycle);
+ 
+    // Switch to requested tab
+    switchTab(currentTab, false);
+ 
+    // Show modal
+    document.getElementById('knowMoreModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+ 
+  function renderPanel(type, panelData) {
+    document.getElementById(type + '-intro').textContent = panelData.intro;
+ 
+    const container = document.getElementById(type + '-steps');
+    container.innerHTML = '';
+    panelData.steps.forEach((step, i) => {
+      const div = document.createElement('div');
+      div.className = 'step-item';
+      div.style.animationDelay = (0.05 + i * 0.055) + 's';
+      div.innerHTML = `
+        <div class="step-num-wrap">
+          <div class="step-num">${String(i+1).padStart(2,'0')}</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-title"><span class="step-icon">${step.icon}</span>${step.title}</div>
+          <div class="step-desc">${step.desc}</div>
+          <span class="step-tag">${step.tag}</span>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+ 
+    const proTipBox = document.getElementById(type + '-protip');
+    const proTipText = document.getElementById(type + '-protip-text');
+    if (panelData.protip) {
+      proTipText.innerHTML = panelData.protip;
+      proTipBox.style.display = 'flex';
+    } else {
+      proTipBox.style.display = 'none';
+    }
+  }
+ 
+  function switchTab(tab, reAnimate) {
+    currentTab = tab;
+    // Update tab buttons
+    document.getElementById('tabDispose').classList.toggle('active', tab === 'dispose');
+    document.getElementById('tabRecycle').classList.toggle('active', tab === 'recycle');
+    // Update panels
+    document.getElementById('panel-dispose').classList.toggle('active', tab === 'dispose');
+    document.getElementById('panel-recycle').classList.toggle('active', tab === 'recycle');
+ 
+    // Re-trigger step animations
+    const panel = document.getElementById('panel-' + tab);
+    const steps = panel.querySelectorAll('.step-item');
+    steps.forEach((s, i) => {
+      s.style.animation = 'none';
+      s.offsetHeight; // reflow
+      s.style.animation = '';
+      s.style.animationDelay = (0.05 + i * 0.055) + 's';
+    });
+  }
+ 
+  function closeModal() {
+    document.getElementById('knowMoreModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+ 
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('knowMoreModal')) closeModal();
+  }
+ 
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>

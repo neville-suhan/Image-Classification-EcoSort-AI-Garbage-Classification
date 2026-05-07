@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — EcoSort AI Model Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #00e676;
+  --green-dark: #00b248;
+  --green-glow: rgba(0,230,118,0.18);
+  --teal: #1de9b6;
+  --blue: #29b6f6;
+  --amber: #ffab40;
+  --red: #ff5252;
+  --purple: #ce93d8;
+  --bg: #050f0a;
+  --bg2: #081a10;
+  --bg3: #0d2318;
+  --card: rgba(13,35,24,0.88);
+  --card2: rgba(8,26,16,0.95);
+  --glass: rgba(0,230,118,0.06);
+  --border: rgba(0,230,118,0.12);
+  --text: #e8f5e9;
+  --muted: #7fa98a;
+  --white: #ffffff;
+  --nav-h: 72px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--green-dark); border-radius:3px; }
+ 
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0; opacity:.4;
+}
+ 
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  height:var(--nav-h);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 48px;
+  background:rgba(5,15,10,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:background .3s;
+}
+nav.scrolled { background:rgba(5,15,10,0.97); }
+.nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.nav-logo {
+  width:42px; height:42px;
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:20px; box-shadow:0 0 20px var(--green-glow);
+}
+.nav-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:800; color:var(--white); line-height:1.1; }
+.nav-title span { color:var(--green); display:block; font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; }
+.nav-links { display:flex; align-items:center; gap:8px; list-style:none; }
+.nav-links a { text-decoration:none; color:var(--muted); font-size:14px; font-weight:500; padding:8px 16px; border-radius:8px; transition:all .25s; }
+.nav-links a:hover, .nav-links a.active { color:var(--white); background:var(--glass); }
+.nav-links .nav-cta { background:var(--green); color:var(--bg) !important; font-weight:700; border-radius:8px; padding:8px 20px; margin-left:8px; box-shadow:0 0 16px var(--green-glow); transition:all .25s; }
+.nav-links .nav-cta:hover { background:var(--teal); transform:translateY(-1px); }
+ 
+/* ── HERO STRIP ── */
+.dash-hero {
+  padding:calc(var(--nav-h) + 60px) 56px 60px;
+  position:relative; z-index:1;
+  background:linear-gradient(160deg,var(--bg3) 0%,var(--bg2) 60%,var(--bg) 100%);
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.dash-hero::before {
+  content:'';
+  position:absolute; top:-120px; right:-120px;
+  width:500px; height:500px;
+  background:radial-gradient(circle,rgba(0,230,118,0.1),transparent 70%);
+  pointer-events:none;
+}
+.dash-hero-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:40px; flex-wrap:wrap; }
+.dash-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.25);
+  color:var(--green); font-size:11px; font-weight:600; letter-spacing:2px;
+  text-transform:uppercase; padding:5px 14px; border-radius:999px; margin-bottom:20px;
+}
+.dash-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(1.4);} }
+.dash-hero h1 {
+  font-family:'Syne',sans-serif; font-size:clamp(32px,4vw,52px); font-weight:800;
+  color:var(--white); line-height:1.1; margin-bottom:14px;
+}
+.dash-hero h1 span { color:var(--green); }
+.dash-hero p { font-size:16px; color:var(--muted); line-height:1.7; max-width:540px; }
+ 
+.hero-kpi-row { display:flex; gap:20px; flex-wrap:wrap; }
+.kpi-box {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:20px 28px; text-align:center; min-width:120px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+  transition:all .3s;
+}
+.kpi-box:hover { border-color:rgba(0,230,118,0.3); transform:translateY(-4px); box-shadow:0 16px 48px rgba(0,230,118,0.08); }
+.kpi-num { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--green); }
+.kpi-label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:4px; }
+ 
+/* ── LAYOUT ── */
+.dash-body { max-width:1200px; margin:0 auto; padding:60px 56px 80px; position:relative; z-index:1; }
+.section-head { margin-bottom:36px; }
+.section-tag {
+  display:inline-block; font-size:11px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--green); font-weight:600; border-left:3px solid var(--green); padding-left:12px; margin-bottom:12px;
+}
+.section-h2 { font-family:'Syne',sans-serif; font-size:clamp(24px,3vw,36px); font-weight:800; color:var(--white); line-height:1.2; margin-bottom:10px; }
+.section-sub { font-size:15px; color:var(--muted); line-height:1.7; max-width:680px; }
+ 
+.sep { height:1px; background:linear-gradient(90deg,var(--green),transparent); opacity:.2; margin:64px 0; }
+ 
+/* ── CARDS ── */
+.card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:20px; padding:32px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+  transition:border-color .3s;
+}
+.card:hover { border-color:rgba(0,230,118,0.22); }
+ 
+/* ── DATASET OVERVIEW ── */
+.dataset-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom:40px; }
+ 
+.bar-chart-wrap { padding:0; }
+.bar-chart-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:var(--white); margin-bottom:4px; }
+.bar-chart-sub { font-size:12px; color:var(--muted); margin-bottom:24px; }
+.bar-item { margin-bottom:16px; }
+.bar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.bar-name { font-size:13px; color:var(--text); display:flex; align-items:center; gap:8px; }
+.bar-name .bicon { font-size:16px; }
+.bar-val { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--green); }
+.bar-track { height:8px; background:rgba(0,230,118,0.08); border-radius:4px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:4px; width:0%; transition:width 1.4s cubic-bezier(.4,0,.2,1); }
+ 
+.donut-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px; }
+.donut-svg-wrap { position:relative; width:220px; height:220px; }
+.donut-svg-wrap svg { transform:rotate(-90deg); }
+.donut-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.donut-center-num { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--green); }
+.donut-center-label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+.donut-legend { display:grid; grid-template-columns:1fr 1fr; gap:10px 20px; width:100%; }
+.dl-item { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); }
+.dl-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+ 
+/* ── CLASS CARDS GRID ── */
+.classes-13-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; }
+.cclass-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:20px 16px; text-align:center;
+  transition:all .3s; cursor:default;
+}
+.cclass-card:hover {
+  border-color:rgba(0,230,118,0.3); transform:translateY(-5px);
+  box-shadow:0 12px 40px rgba(0,230,118,0.1);
+}
+.cc-emoji { font-size:32px; margin-bottom:10px; display:block; }
+.cc-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--white); text-transform:capitalize; margin-bottom:6px; }
+.cc-count { font-size:18px; font-weight:800; color:var(--green); font-family:'Syne',sans-serif; margin-bottom:4px; }
+.cc-label { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; }
+.cc-bar-bg { height:4px; background:rgba(0,230,118,0.1); border-radius:2px; overflow:hidden; }
+.cc-bar-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--green),var(--teal)); width:0%; transition:width 1.4s ease; }
+.cc-badge { display:inline-block; margin-top:8px; font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--green); background:rgba(0,230,118,0.08); padding:3px 8px; border-radius:4px; font-weight:700; }
+.cc-badge.amber { color:var(--amber); background:rgba(255,171,64,0.08); }
+.cc-badge.blue { color:var(--blue); background:rgba(41,182,246,0.08); }
+ 
+/* ── TRAINING PIPELINE — NEW FULL-WIDTH LAYOUT ── */
+.pipeline-full { display:flex; flex-direction:column; gap:0; }
+ 
+/* Horizontal phase dividers */
+.phase-label {
+  display:flex; align-items:center; gap:16px; margin:32px 0 20px;
+}
+.phase-label-text {
+  font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+  letter-spacing:3px; text-transform:uppercase; color:var(--green); white-space:nowrap;
+}
+.phase-label-line { flex:1; height:1px; background:linear-gradient(90deg, rgba(0,230,118,0.3), transparent); }
+ 
+/* Step cards in a 2-col grid */
+.steps-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.step-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:24px 28px;
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+  transition:all .3s;
+  position:relative;
+  overflow:hidden;
+}
+.step-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,rgba(0,230,118,0.2),transparent);
+  opacity:0; transition:opacity .3s;
+}
+.step-card:hover { border-color:rgba(0,230,118,0.28); transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.4); }
+.step-card:hover::before { opacity:1; }
+.step-card.highlight {
+  background:linear-gradient(135deg,rgba(0,230,118,0.07),rgba(29,233,182,0.04));
+  border-color:rgba(0,230,118,0.28);
+}
+.step-card.highlight::after {
+  content:'KEY STEP';
+  position:absolute; top:14px; right:14px;
+  font-family:'Syne',sans-serif; font-size:8px; font-weight:800; letter-spacing:2px;
+  color:var(--green); background:rgba(0,230,118,0.12);
+  padding:3px 8px; border-radius:4px;
+}
+ 
+.step-num-badge {
+  width:44px; height:44px; flex-shrink:0;
+  border-radius:14px;
+  background:rgba(0,230,118,0.08);
+  border:1px solid rgba(0,230,118,0.2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-size:13px; font-weight:800; color:var(--green);
+}
+.step-card.highlight .step-num-badge {
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  color:var(--bg); border:none;
+  box-shadow:0 0 16px rgba(0,230,118,0.3);
+}
+ 
+.step-body { flex:1; min-width:0; }
+.step-emoji { font-size:20px; margin-bottom:8px; display:block; }
+.step-title {
+  font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+  color:var(--white); margin-bottom:6px; line-height:1.3;
+}
+.step-desc {
+  font-size:13px; color:var(--muted); line-height:1.7;
+}
+.step-desc strong { color:var(--text); }
+.step-desc code {
+  font-family:'Courier New',monospace; font-size:11px;
+  color:var(--green); background:rgba(0,230,118,0.08);
+  padding:1px 6px; border-radius:4px;
+}
+ 
+/* Tags row below a step */
+.step-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.step-tag {
+  font-size:10px; letter-spacing:1px; text-transform:uppercase; font-weight:700;
+  padding:3px 9px; border-radius:5px;
+}
+.step-tag.green { color:var(--green); background:rgba(0,230,118,0.09); }
+.step-tag.blue  { color:var(--blue);  background:rgba(41,182,246,0.09); }
+.step-tag.amber { color:var(--amber); background:rgba(255,171,64,0.09); }
+.step-tag.teal  { color:var(--teal);  background:rgba(29,233,182,0.09); }
+.step-tag.purple{ color:var(--purple);background:rgba(206,147,216,0.09); }
+ 
+/* Balancing info callout card */
+.balance-callout {
+  margin-top:28px;
+  background:linear-gradient(135deg,rgba(0,230,118,0.06),rgba(29,233,182,0.03));
+  border:1px solid rgba(0,230,118,0.22);
+  border-radius:20px;
+  padding:32px 36px;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:32px;
+  align-items:center;
+}
+.bc-icon { font-size:48px; flex-shrink:0; }
+.bc-text h4 {
+  font-family:'Syne',sans-serif; font-size:16px; font-weight:800;
+  color:var(--white); margin-bottom:10px;
+}
+.bc-text p { font-size:13px; color:var(--muted); line-height:1.75; }
+.bc-text p strong { color:var(--text); }
+.bc-text p code {
+  font-family:'Courier New',monospace; font-size:11px;
+  color:var(--green); background:rgba(0,230,118,0.08);
+  padding:1px 6px; border-radius:4px;
+}
+.bc-formula {
+  text-align:center; flex-shrink:0;
+  background:rgba(0,0,0,0.35);
+  border:1px solid rgba(0,230,118,0.15);
+  border-radius:14px;
+  padding:20px 24px;
+  min-width:200px;
+}
+.bc-formula .formula-text {
+  font-family:'Courier New',monospace; font-size:13px; color:var(--green);
+  border-bottom:1px solid rgba(0,230,118,0.2); padding-bottom:10px; margin-bottom:10px;
+  white-space:nowrap;
+}
+.bc-formula .formula-label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+ 
+/* Augmentation visual grid */
+.aug-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px;
+}
+.aug-item {
+  background:rgba(0,0,0,0.3); border:1px solid rgba(0,230,118,0.1);
+  border-radius:10px; padding:10px 12px; text-align:center;
+}
+.aug-item .aug-icon { font-size:18px; margin-bottom:4px; }
+.aug-item .aug-name { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+.aug-item .aug-val { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--green); margin-top:2px; }
+ 
+/* Architecture visual */
+.arch-layers {
+  display:flex; align-items:center; gap:0; margin-top:12px; flex-wrap:wrap;
+}
+.arch-layer {
+  flex:1; min-width:0; text-align:center; padding:8px 6px;
+  background:rgba(0,0,0,0.3); border:1px solid rgba(0,230,118,0.1);
+  border-radius:8px; font-size:10px; color:var(--muted); letter-spacing:.5px;
+  transition: all .3s;
+}
+.arch-layer:hover { border-color:rgba(0,230,118,0.3); color:var(--green); }
+.arch-layer .al-icon { font-size:14px; display:block; margin-bottom:3px; }
+.arch-arrow {
+  font-size:12px; color:rgba(0,230,118,0.4); padding:0 4px; flex-shrink:0;
+}
+ 
+/* ── ACCURACY CHART (Canvas) ── */
+.chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+.chart-card { position:relative; }
+.chart-card canvas { width:100% !important; height:240px !important; }
+ 
+/* ── MODEL COMPARISON TABLE ── */
+.model-table { width:100%; border-collapse:collapse; }
+.model-table th {
+  font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
+  letter-spacing:1.5px; text-transform:uppercase; color:var(--muted);
+  padding:12px 16px; border-bottom:1px solid var(--border); text-align:left;
+}
+.model-table td {
+  padding:14px 16px; border-bottom:1px solid rgba(0,230,118,0.06);
+  font-size:14px; color:var(--muted);
+}
+.model-table tr:hover td { background:rgba(0,230,118,0.03); color:var(--text); }
+.model-table .best { background:rgba(0,230,118,0.06); }
+.model-table .best td { color:var(--text); }
+.model-name { font-family:'Syne',sans-serif; font-weight:700; color:var(--white); }
+.best-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  color:var(--bg); font-size:10px; font-weight:800; letter-spacing:1px;
+  text-transform:uppercase; padding:3px 10px; border-radius:999px; margin-left:8px;
+}
+.acc-pill { font-family:'Syne',sans-serif; font-weight:700; color:var(--green); font-size:15px; }
+.acc-bar-sm { height:4px; border-radius:2px; background:rgba(0,230,118,0.1); margin-top:6px; overflow:hidden; }
+.acc-bar-sm-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--green),var(--teal)); }
+ 
+/* ── NOTE ── */
+.note-card {
+  background:linear-gradient(135deg,rgba(255,171,64,0.07),rgba(255,82,82,0.04));
+  border:1px solid rgba(255,171,64,0.25);
+  border-radius:16px; padding:28px 32px;
+  display:flex; gap:20px; align-items:flex-start;
+}
+.note-icon { font-size:32px; flex-shrink:0; }
+.note-content h3 { font-family:'Syne',sans-serif; font-size:17px; font-weight:800; color:var(--amber); margin-bottom:10px; }
+.note-content p { font-size:14px; color:var(--muted); line-height:1.7; }
+.note-content p strong { color:var(--text); }
+ 
+/* ── PERFORMANCE METRICS ── */
+.perf-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+.perf-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:24px; text-align:center;
+  transition:all .3s;
+}
+.perf-card:hover { border-color:rgba(0,230,118,0.28); transform:translateY(-4px); }
+.perf-icon { font-size:28px; margin-bottom:12px; }
+.perf-num { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--green); margin-bottom:4px; }
+.perf-label { font-size:12px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+.perf-sub { font-size:11px; color:rgba(127,169,138,0.6); margin-top:6px; }
+ 
+/* ── SCROLL REVEAL ── */
+.reveal { opacity:0; transform:translateY(40px); transition:opacity .8s ease,transform .8s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+.reveal-l { opacity:0; transform:translateX(-30px); transition:opacity .7s ease,transform .7s ease; }
+.reveal-l.visible { opacity:1; transform:translateX(0); }
+.reveal-r { opacity:0; transform:translateX(30px); transition:opacity .7s ease,transform .7s ease; }
+.reveal-r.visible { opacity:1; transform:translateX(0); }
+ 
+/* ── FOOTER ── */
+footer {
+  background:var(--bg2); border-top:1px solid var(--border);
+  padding:60px 56px 40px; position:relative; z-index:1;
+}
+.footer-inner { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; }
+.footer-brand-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--white); margin-bottom:12px; }
+.footer-brand-title span { color:var(--green); }
+.footer-brand p { font-size:14px; color:var(--muted); line-height:1.7; max-width:280px; }
+.footer-col h5 { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--white); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:16px; }
+.footer-col ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.footer-col ul a { text-decoration:none; font-size:14px; color:var(--muted); transition:color .2s; }
+.footer-col ul a:hover { color:var(--green); }
+.footer-bottom { max-width:1200px; margin:40px auto 0; padding-top:24px; border-top:1px solid rgba(0,230,118,0.08); display:flex; align-items:center; justify-content:space-between; font-size:13px; color:var(--muted); flex-wrap:wrap; gap:12px; }
+.footer-bottom span.g { color:var(--green); }
+ 
+@media(max-width:900px) {
+  .dash-hero, .dash-body { padding-left:20px; padding-right:20px; }
+  .dataset-grid, .chart-grid, .perf-grid { grid-template-columns:1fr; }
+  .steps-grid { grid-template-columns:1fr; }
+  .balance-callout { grid-template-columns:1fr; text-align:center; }
+  .footer-inner { grid-template-columns:1fr 1fr; }
+  nav { padding:0 20px; }
+  .nav-links { display:none; }
+  .hero-kpi-row { gap:12px; }
+}
+</style>
+</head>
+<body>
+ 
+<!-- ─── NAVBAR ─── -->
+<nav id="navbar">
+  <a class="nav-brand" href="{{ url_for('home') }}">
+    <div class="nav-logo">♻️</div>
+    <div class="nav-title">EcoSort<em style="font-style:normal;color:var(--green)"> AI</em><span>Garbage Classification</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="{{ url_for('home') }}">Home</a></li>
+    <li><a href="{{ url_for('home') }}#features">About</a></li>
+    <li><a href="{{ url_for('dashboard') }}" class="active">Dashboard</a></li>
+    <li><a href="{{ url_for('home') }}#classes">Resources</a></li>
+    <li><a href="{{ url_for('home') }}#contact">Contact Us</a></li>
+    <li><a href="{{ url_for('predict') }}" class="nav-cta">Predict Now</a></li>
+    <li><a href="/logout" class="nav-cta">LogOut</a></li>
+  </ul>
+</nav>
+ 
+<!-- ─── HERO STRIP ─── -->
+<div class="dash-hero">
+  <div class="dash-hero-inner">
+    <div class="dash-hero-left">
+      <div class="dash-badge">📊 Model Analytics Dashboard</div>
+      <h1>EcoSort <span>Model</span><br>Performance Report</h1>
+      <p>A comprehensive analysis of our deep learning garbage classification model — dataset overview, training pipeline, accuracy metrics, and per-class performance insights.</p>
+    </div>
+    <div class="hero-kpi-row">
+      <div class="kpi-box">
+        <div class="kpi-num">13</div>
+        <div class="kpi-label">Classes</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-num">89%</div>
+        <div class="kpi-label">Best Accuracy</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-num">20</div>
+        <div class="kpi-label">Epochs</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-num">MNv2</div>
+        <div class="kpi-label">Best Model</div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<div class="dash-body">
+ 
+  <!-- ══ SECTION 1: DATASET OVERVIEW ══ -->
+  <div class="section-head reveal">
+    <div class="section-tag">01 — Dataset</div>
+    <h2 class="section-h2">Dataset Overview & Distribution</h2>
+    <p class="section-sub">Our training dataset spans 13 real-world waste categories with highly imbalanced class distribution. A notable class imbalance existed — particularly for <strong style="color:var(--green)">Clothes (~5,000 images)</strong> and <strong style="color:var(--green)">Shoes (~1,000 images)</strong> — which was addressed using class-weight balancing during training.</p>
+  </div>
+ 
+  <div class="dataset-grid reveal">
+    <div class="card bar-chart-wrap">
+      <div class="bar-chart-title">📁 Images per Class</div>
+      <div class="bar-chart-sub">Approximate image count per waste category in training dataset</div>
+      <div id="barChartContainer"></div>
+    </div>
+    <div class="card donut-wrap">
+      <div>
+        <div class="bar-chart-title" style="text-align:center;">🥧 Dataset Composition</div>
+        <div class="bar-chart-sub" style="text-align:center;">Share of each class in total dataset</div>
+      </div>
+      <div class="donut-svg-wrap">
+        <svg width="220" height="220" viewBox="0 0 220 220" id="donutSvg"></svg>
+        <div class="donut-center">
+          <div class="donut-center-num">~17K</div>
+          <div class="donut-center-label">Total Images</div>
+        </div>
+      </div>
+      <div class="donut-legend" id="donutLegend"></div>
+    </div>
+  </div>
+ 
+  <div class="section-head reveal" style="margin-top:48px;">
+    <div class="section-tag">Classes</div>
+    <h2 class="section-h2">All 13 Waste Categories</h2>
+    <p class="section-sub">Each card shows the class name, approximate image count, and proportional fill relative to the largest class.</p>
+  </div>
+  <div class="classes-13-grid" id="classCardsGrid"></div>
+ 
+  <div class="sep"></div>
+ 
+  <!-- ══ SECTION 2: TRAINING PIPELINE ══ -->
+  <div class="section-head reveal">
+    <div class="section-tag">02 — Training Pipeline</div>
+    <h2 class="section-h2">How We Trained the Model</h2>
+    <p class="section-sub">A structured, step-by-step deep learning pipeline — from raw data ingestion to saved best-checkpoint model — ensuring maximum generalization and fairness across all 13 waste classes.</p>
+  </div>
+ 
+  <div class="pipeline-full reveal">
+ 
+    <!-- PHASE 1: DATA PREPARATION -->
+    <div class="phase-label">
+      <span class="phase-label-text">Phase 1 — Data Preparation</span>
+      <div class="phase-label-line"></div>
+    </div>
+ 
+    <div class="steps-grid">
+ 
+      <!-- Step 1 -->
+      <div class="step-card">
+        <div class="step-num-badge">01</div>
+        <div class="step-body">
+          <span class="step-emoji">📦</span>
+          <div class="step-title">Unzip & Load Dataset</div>
+          <div class="step-desc">
+            Raw dataset archive was unzipped and structured into class-wise folders. Directory structure was carefully verified before ingestion — ensuring every category folder was intact and correctly labelled before being fed into the data pipeline.
+          </div>
+          <div class="step-tags">
+            <span class="step-tag green">File System</span>
+            <span class="step-tag blue">Data Ingestion</span>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Step 2 -->
+      <div class="step-card">
+        <div class="step-num-badge">02</div>
+        <div class="step-body">
+          <span class="step-emoji">📚</span>
+          <div class="step-title">Import Libraries & Confirm GPU</div>
+          <div class="step-desc">
+            Core libraries — <strong>TensorFlow, Keras, NumPy, Pandas, scikit-learn</strong>, and <strong>Matplotlib</strong> — were imported. GPU availability was confirmed prior to training to ensure hardware-accelerated computation for faster epoch processing.
+          </div>
+          <div class="step-tags">
+            <span class="step-tag teal">TensorFlow</span>
+            <span class="step-tag purple">GPU Verified</span>
+            <span class="step-tag blue">scikit-learn</span>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Step 3 — Augmentation (wider, with aug grid) -->
+      <div class="step-card" style="grid-column:1/-1;">
+        <div class="step-num-badge">03</div>
+        <div class="step-body">
+          <span class="step-emoji">🔄</span>
+          <div class="step-title">Real-Time Image Augmentation</div>
+          <div class="step-desc">
+            Applied live augmentation during training to artificially expand the dataset and significantly boost model robustness on unseen real-world images. All transformations are applied on-the-fly so the model never sees the same image twice in the same form.
+          </div>
+          <div class="aug-grid">
+            <div class="aug-item"><div class="aug-icon">🔁</div><div class="aug-name">Rotation</div><div class="aug-val">±30°</div></div>
+            <div class="aug-item"><div class="aug-icon">↔️</div><div class="aug-name">Horiz. Flip</div><div class="aug-val">Enabled</div></div>
+            <div class="aug-item"><div class="aug-icon">🔍</div><div class="aug-name">Zoom</div><div class="aug-val">±20%</div></div>
+            <div class="aug-item"><div class="aug-icon">↕️</div><div class="aug-name">Height Shift</div><div class="aug-val">±15%</div></div>
+            <div class="aug-item"><div class="aug-icon">↩️</div><div class="aug-name">Width Shift</div><div class="aug-val">±15%</div></div>
+            <div class="aug-item"><div class="aug-icon">📐</div><div class="aug-name">Shear</div><div class="aug-val">±10°</div></div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Step 4 -->
+      <div class="step-card">
+        <div class="step-num-badge">04</div>
+        <div class="step-body">
+          <span class="step-emoji">✂️</span>
+          <div class="step-title">Train / Validation Split</div>
+          <div class="step-desc">
+            The full dataset was partitioned into an <strong>80% training set</strong> and a <strong>20% validation set</strong> using stratified sampling — guaranteeing that each class maintains its natural proportion in both subsets, avoiding any accidental imbalance.
+          </div>
+          <div class="step-tags">
+            <span class="step-tag amber">80% Train</span>
+            <span class="step-tag green">20% Validation</span>
+            <span class="step-tag blue">Stratified</span>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Step 5 — KEY STEP balancing -->
+      <div class="step-card highlight">
+        <div class="step-num-badge">05</div>
+        <div class="step-body">
+          <span class="step-emoji">⚖️</span>
+          <div class="step-title">Dataset Balancing via Class Weights</div>
+          <div class="step-desc">
+            Extreme class imbalance — <strong>Clothes (~5,000 images)</strong> vs <strong>Brown Glass (~600 images)</strong> — was handled using <code>compute_class_weight('balanced')</code> from scikit-learn. This computes per-class weights inversely proportional to their sample count, penalising the model more for errors on minority classes.
+          </div>
+          <div class="step-tags">
+            <span class="step-tag green">Inverse Frequency</span>
+            <span class="step-tag amber">Imbalance Correction</span>
+            <span class="step-tag teal">Fairness</span>
+          </div>
+        </div>
+      </div>
+ 
+    </div>
+ 
+    <!-- Balancing callout -->
+    <div class="balance-callout reveal">
+      <div class="bc-icon">⚖️</div>
+      <div class="bc-text">
+        <h4>Why Class-Weight Balancing Matters</h4>
+        <p>
+          Without balancing, a model trained on <strong>5,000 Clothes images</strong> alongside <strong>600 Brown Glass images</strong> would develop a strong bias — always predicting "Clothes" to minimise overall loss, regardless of actual content. The minority classes would be effectively ignored.<br><br>
+          <code>compute_class_weight('balanced')</code> forces the model to treat every class with equal importance — penalising minority class errors proportionally more, resulting in a truly fair multi-class classifier.
+        </p>
+      </div>
+      <div class="bc-formula">
+        <div class="formula-text">n_samples ÷ (n_classes × n_i)</div>
+        <div class="formula-label">Weight formula per class</div>
+      </div>
+    </div>
+ 
+    <!-- PHASE 2: MODEL CONSTRUCTION -->
+    <div class="phase-label" style="margin-top:40px;">
+      <span class="phase-label-text">Phase 2 — Model Construction</span>
+      <div class="phase-label-line"></div>
+    </div>
+ 
+    <div class="steps-grid">
+ 
+      <!-- Step 6 -->
+      <div class="step-card">
+        <div class="step-num-badge">06</div>
+        <div class="step-body">
+          <span class="step-emoji">🏗️</span>
+          <div class="step-title">Load Pretrained MobileNetV2 & Freeze Layers</div>
+          <div class="step-desc">
+            <strong>MobileNetV2</strong> (pretrained on ImageNet) was loaded as the backbone. All base layers were frozen to preserve the rich feature representations already learned from millions of images — avoiding the need to retrain from scratch.
+          </div>
+          <div class="step-tags">
+            <span class="step-tag green">MobileNetV2</span>
+            <span class="step-tag blue">Transfer Learning</span>
+            <span class="step-tag purple">ImageNet Weights</span>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Step 7 — with arch visualization -->
+      <div class="step-card" style="grid-column:1/-1;">
+        <div class="step-num-badge">07</div>
+        <div class="step-body">
+          <span class="step-emoji">🧩</span>
+          <div class="step-title">Add Custom Classifier Head</div>
+          <div class="step-desc" style="margin-bottom:12px;">
+            A custom classification head was stacked on top of the frozen MobileNetV2 backbone to adapt it to our specific 13-class waste recognition problem. Only these top layers are updated during training.
+          </div>
+          <div class="arch-layers">
+            <div class="arch-layer"><span class="al-icon">🧠</span>MobileNetV2<br><span style="color:rgba(0,230,118,0.5);font-size:9px;">FROZEN BASE</span></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-layer"><span class="al-icon">🌐</span>Global Avg<br>Pooling2D</div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-layer"><span class="al-icon">🔷</span>Dense 256<br><span style="color:rgba(41,182,246,0.7);font-size:9px;">ReLU</span></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-layer"><span class="al-icon">💧</span>Dropout<br><span style="color:rgba(255,171,64,0.7);font-size:9px;">0.4 rate</span></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-layer" style="border-color:rgba(0,230,118,0.3);"><span class="al-icon">🎯</span>Dense 13<br><span style="color:var(--green);font-size:9px;">SOFTMAX</span></div>
+          </div>
+          <div class="step-tags" style="margin-top:12px;">
+            <span class="step-tag green">Softmax Output</span>
+            <span class="step-tag amber">Dropout 0.4</span>
+            <span class="step-tag blue">256-unit Dense</span>
+          </div>
+        </div>
+      </div>
+ 
+    </div>
+ 
+    <!-- PHASE 3: TRAINING & EVALUATION -->
+    <div class="phase-label" style="margin-top:40px;">
+      <span class="phase-label-text">Phase 3 — Training & Evaluation</span>
+      <div class="phase-label-line"></div>
+    </div>
+ 
+    <div class="steps-grid">
+ 
+      <!-- Step 8 -->
+      <div class="step-card">
+        <div class="step-num-badge">08</div>
+        <div class="step-body">
+          <span class="step-emoji">⚡</span>
+          <div class="step-title">Compile with Optimizer & Callbacks</div>
+          <div class="step-desc">
+            Model compiled using the <strong>Adam optimizer</strong> with <strong>sparse categorical crossentropy</strong> loss. Two key callbacks were attached: <strong>EarlyStopping</strong> with patience of 5 epochs (to prevent overfitting), and <strong>ModelCheckpoint</strong> to automatically save the best-accuracy weights.
+          </div>
+          <div class="step-tags">
+            <span class="step-tag teal">Adam Optimizer</span>
+            <span class="step-tag amber">EarlyStopping (p=5)</span>
+            <span class="step-tag green">ModelCheckpoint</span>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Step 9 -->
+      <div class="step-card">
+        <div class="step-num-badge">09</div>
+        <div class="step-body">
+          <span class="step-emoji">🚀</span>
+          <div class="step-title">Train for 20–25 Epochs with Class Weights</div>
+          <div class="step-desc">
+            Full training run executed with class weight dictionary applied at every batch update. The best validation checkpoint was automatically saved. Training and validation curves were monitored after each epoch to detect overfitting or underfitting early.
+          </div>
+          <div class="step-tags">
+            <span class="step-tag green">20–25 Epochs</span>
+            <span class="step-tag blue">Class Weights Applied</span>
+            <span class="step-tag amber">Live Monitoring</span>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Step 10 -->
+      <div class="step-card" style="grid-column:1/-1;">
+        <div class="step-num-badge">10</div>
+        <div class="step-body">
+          <span class="step-emoji">📊</span>
+          <div class="step-title">Evaluate, Visualize & Report</div>
+          <div class="step-desc">
+            After training, the best-checkpoint model was evaluated on the held-out test set. A full suite of performance visualizations was generated — <strong>accuracy/loss curves</strong> across epochs, a <strong>confusion matrix</strong> revealing class-level prediction patterns, and a <strong>per-class classification report</strong> with precision, recall, and F1-score for all 13 categories. These insights directly informed final model selection.
+          </div>
+          <div class="step-tags">
+            <span class="step-tag green">Accuracy / Loss Curves</span>
+            <span class="step-tag blue">Confusion Matrix</span>
+            <span class="step-tag teal">Precision & Recall</span>
+            <span class="step-tag purple">F1-Score Report</span>
+            <span class="step-tag amber">Model Selection</span>
+          </div>
+        </div>
+      </div>
+ 
+    </div>
+ 
+  </div><!-- end pipeline-full -->
+ 
+  <div class="sep"></div>
+ 
+  <!-- ══ SECTION 3: MODEL PERFORMANCE ══ -->
+  <div class="section-head reveal">
+    <div class="section-tag">03 — Performance</div>
+    <h2 class="section-h2">Model Performance Metrics</h2>
+    <p class="section-sub">After 20 training epochs, our best model achieved strong generalization across all 13 classes with training accuracy reaching around ~90% and validation accuracy stabilizing at ~86–87%.</p>
+  </div>
+ 
+  <div class="perf-grid reveal" style="margin-bottom:40px;">
+    <div class="perf-card">
+      <div class="perf-icon">🎯</div>
+      <div class="perf-num">89.6%</div>
+      <div class="perf-label">Train Accuracy</div>
+      <div class="perf-sub">Epoch 20</div>
+    </div>
+    <div class="perf-card">
+      <div class="perf-icon">✅</div>
+      <div class="perf-num">86.8%</div>
+      <div class="perf-label">Val Accuracy</div>
+      <div class="perf-sub">Best checkpoint</div>
+    </div>
+    <div class="perf-card">
+      <div class="perf-icon">📉</div>
+      <div class="perf-num">0.29</div>
+      <div class="perf-label">Train Loss</div>
+      <div class="perf-sub">Final epoch</div>
+    </div>
+    <div class="perf-card">
+      <div class="perf-icon">📊</div>
+      <div class="perf-num">0.35</div>
+      <div class="perf-label">Val Loss</div>
+      <div class="perf-sub">Stabilized</div>
+    </div>
+  </div>
+ 
+  <div class="chart-grid reveal" style="margin-bottom:40px;">
+    <div class="card chart-card">
+      <div class="bar-chart-title" style="margin-bottom:4px;">📈 Model Accuracy</div>
+      <div class="bar-chart-sub">Training vs Validation over 20 Epochs</div>
+      <canvas id="accChart"></canvas>
+    </div>
+    <div class="card chart-card">
+      <div class="bar-chart-title" style="margin-bottom:4px;">📉 Model Loss</div>
+      <div class="bar-chart-sub">Training vs Validation over 20 Epochs</div>
+      <canvas id="lossChart"></canvas>
+    </div>
+  </div>
+ 
+  <div class="sep"></div>
+ 
+  <!-- ══ SECTION 4: MODEL COMPARISON ══ -->
+  <div class="section-head reveal">
+    <div class="section-tag">04 — Model Comparison</div>
+    <h2 class="section-h2">Model Benchmark Results</h2>
+    <p class="section-sub">We evaluated multiple pretrained CNN architectures under identical training conditions. <strong style="color:var(--green)">MobileNetV2 emerged as the top performer</strong> — achieving the best validation accuracy while maintaining low computational overhead.</p>
+  </div>
+ 
+  <div class="card reveal">
+    <table class="model-table">
+      <thead>
+        <tr>
+          <th>Architecture</th>
+          <th>Parameters</th>
+          <th>Train Accuracy</th>
+          <th>Val Accuracy</th>
+          <th>Val Loss</th>
+          <th>Inference Speed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="best">
+          <td><span class="model-name">MobileNetV2</span> <span class="best-badge">⭐ Best Model</span></td>
+          <td style="color:var(--text);">3.4M</td>
+          <td><span class="acc-pill">89.6%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:89.6%;"></div></div></td>
+          <td><span class="acc-pill">86.8%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:86.8%;"></div></div></td>
+          <td style="color:var(--text);">0.35</td>
+          <td style="color:var(--green);font-weight:600;">⚡ Fastest</td>
+        </tr>
+        <tr>
+          <td><span class="model-name">VGG16</span></td>
+          <td>138M</td>
+          <td><span class="acc-pill" style="color:var(--muted);">84.2%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:84.2%;background:var(--muted);"></div></div></td>
+          <td><span class="acc-pill" style="color:var(--muted);">78.6%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:78.6%;background:var(--muted);"></div></div></td>
+          <td>0.52</td>
+          <td>🐢 Very Slow</td>
+        </tr>
+        <tr>
+          <td><span class="model-name">ResNet50</span></td>
+          <td>25.6M</td>
+          <td><span class="acc-pill" style="color:var(--muted);">87.5%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:87.5%;background:rgba(127,169,138,0.6);"></div></div></td>
+          <td><span class="acc-pill" style="color:var(--muted);">82.3%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:82.3%;background:rgba(127,169,138,0.6);"></div></div></td>
+          <td>0.45</td>
+          <td>🚶 Moderate</td>
+        </tr>
+        <tr>
+          <td><span class="model-name">DenseNet</span></td>
+          <td>8M</td>
+          <td><span class="acc-pill" style="color:var(--muted);">86.3%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:86.3%;background:rgba(127,169,138,0.6);"></div></div></td>
+          <td><span class="acc-pill" style="color:var(--muted);">83.1%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:83.1%;background:rgba(127,169,138,0.6);"></div></div></td>
+          <td>0.42</td>
+          <td>🐢 Slow</td>
+        </tr>
+        <tr>
+          <td><span class="model-name">EfficientNet</span></td>
+          <td>5.3M</td>
+          <td><span class="acc-pill" style="color:var(--muted);">87.9%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:87.9%;background:rgba(127,169,138,0.6);"></div></div></td>
+          <td><span class="acc-pill" style="color:var(--muted);">85.2%</span><div class="acc-bar-sm"><div class="acc-bar-sm-fill" style="width:85.2%;background:rgba(127,169,138,0.6);"></div></div></td>
+          <td>0.38</td>
+          <td>⚡ Moderate-Fast</td>
+        </tr>
+      </tbody>
+    </table>
+ 
+    <div style="margin-top:20px;padding:16px;background:rgba(0,230,118,0.04);border:1px solid rgba(0,230,118,0.15);border-radius:12px;">
+      <p style="font-size:13px;color:var(--muted);line-height:1.7;">
+        🏆 <strong style="color:var(--green);">MobileNetV2</strong> was selected as the production model due to its
+        <strong style="color:var(--white);">fastest inference speed</strong>, low computational cost with only
+        <strong style="color:var(--white);">3.4M parameters</strong>, and stable validation accuracy of
+        <strong style="color:var(--white);">86.8%</strong>.
+        <br><br>
+        While models like <strong>EfficientNet</strong> and <strong>DenseNet</strong> showed competitive accuracy,
+        they required higher computation and slower inference. Hence, MobileNetV2 provides the best
+        <strong style="color:var(--green);">balance between speed and accuracy</strong> for real-time garbage classification.
+      </p>
+    </div>
+  </div>
+ 
+  <div class="sep"></div>
+ 
+  <!-- ══ SECTION 5: NOTE ══ -->
+  <div class="section-head reveal">
+    <div class="section-tag">05 — Important Note</div>
+    <h2 class="section-h2">Classification Note for Users</h2>
+  </div>
+  <div class="note-card reveal">
+    <div class="note-icon">⚠️</div>
+    <div class="note-content">
+      <h3>Organic & Biological — Functionally Equivalent Classes</h3>
+      <p>
+        Our dataset contains two closely related waste categories: <strong>Organic</strong> and <strong>Biological</strong>. In the context of this classification system, both categories refer to <strong>biodegradable waste</strong> — such as food scraps, plant matter, garden waste, and other naturally decomposable materials.<br><br>
+        These classes were maintained separately in the dataset to improve model granularity; however, from a <strong>disposal and recycling standpoint, they are interchangeable</strong>. Both types of waste should be directed to compost bins, food waste collection, or biogas processing facilities.<br><br>
+        <strong>📌 Therefore, if the model predicts either "Organic" or "Biological" for an uploaded image, the recommended action and disposal method are identical.</strong> Users need not distinguish between the two — treat both predictions as one unified biodegradable waste category.
+      </p>
+    </div>
+  </div>
+ 
+</div><!-- end dash-body -->
+ 
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-brand-title">EcoSort <span>AI</span></div>
+      <p>An AI-powered garbage classification platform helping people recycle smarter and build a more sustainable world — one image at a time.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Navigation</h5>
+      <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('predict') }}">Predict</a></li>
+        <li><a href="{{ url_for('home') }}#classes">Resources</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Model</h5>
+      <ul>
+        <li><a href="#dataset">Dataset Info</a></li>
+        <li><a href="#pipeline">Training Pipeline</a></li>
+        <li><a href="#performance">Performance</a></li>
+        <li><a href="#comparison">Model Comparison</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Account</h5>
+      <ul>
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+        <li><a href="{{ url_for('register') }}">Register</a></li>
+        <li><a href="{{ url_for('predict') }}">Try Classifier</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 EcoSort AI — Built for a <span class="g">greener</span> tomorrow.</span>
+    <span>🧠 MobileNetV2 · 13 Classes · ~89% Accuracy</span>
+  </div>
+</footer>
+ 
+<script>
+// ── NAV SCROLL
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', scrollY > 60);
+});
+ 
+// ── REVEAL OBSERVER
+const revEls = document.querySelectorAll('.reveal, .reveal-l, .reveal-r');
+const revObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); revObs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+revEls.forEach(el => revObs.observe(el));
+ 
+// ── DATASET
+const classData = [
+  { name:'clothes',    emoji:'👕', count:5000, color:'#00e676' },
+  { name:'shoes',      emoji:'👟', count:1000, color:'#1de9b6' },
+  { name:'cardboard',  emoji:'📦', count:800,  color:'#29b6f6' },
+  { name:'organic',    emoji:'🍂', count:780,  color:'#66bb6a' },
+  { name:'paper',      emoji:'📄', count:760,  color:'#26c6da' },
+  { name:'metal',      emoji:'🥫', count:740,  color:'#42a5f5' },
+  { name:'plastic',    emoji:'🧴', count:720,  color:'#4dd0e1' },
+  { name:'trash',      emoji:'🗑️', count:700,  color:'#80deea' },
+  { name:'biological', emoji:'🌿', count:900,  color:'#a5d6a7' },
+  { name:'battery',    emoji:'🔋', count:900,  color:'#ffab40' },
+  { name:'brown-glass',emoji:'🍺', count:600,  color:'#ff7043' },
+  { name:'green-glass',emoji:'🟢', count:620,  color:'#66bb6a' },
+  { name:'white-glass',emoji:'🫙', count:580,  color:'#b0bec5' },
+];
+const maxCount = Math.max(...classData.map(d => d.count));
+const totalCount = classData.reduce((a,b) => a+b.count, 0);
+ 
+// ── BAR CHART
+const barContainer = document.getElementById('barChartContainer');
+classData.slice().sort((a,b) => b.count - a.count).forEach(d => {
+  const pct = (d.count / maxCount * 100).toFixed(1);
+  barContainer.innerHTML += `
+    <div class="bar-item">
+      <div class="bar-header">
+        <span class="bar-name"><span class="bicon">${d.emoji}</span>${d.name}</span>
+        <span class="bar-val">${d.count.toLocaleString()}</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" data-w="${pct}" style="background:${d.color};width:0%;"></div>
+      </div>
+    </div>`;
+});
+ 
+// ── DONUT CHART
+(function drawDonut() {
+  const svg = document.getElementById('donutSvg');
+  const cx=110, cy=110, r=90, inner=60;
+  const circ = 2 * Math.PI * r;
+  let offset = 0;
+  const legend = document.getElementById('donutLegend');
+  classData.forEach(d => {
+    const pct = d.count / totalCount;
+    const len = pct * circ;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',cx); circle.setAttribute('cy',cy); circle.setAttribute('r',r);
+    circle.setAttribute('fill','none');
+    circle.setAttribute('stroke',d.color);
+    circle.setAttribute('stroke-width',inner);
+    circle.setAttribute('stroke-dasharray',`${len} ${circ-len}`);
+    circle.setAttribute('stroke-dashoffset',`${-offset}`);
+    svg.appendChild(circle);
+    offset += len;
+    legend.innerHTML += `<div class="dl-item"><div class="dl-dot" style="background:${d.color};"></div>${d.name}</div>`;
+  });
+})();
+ 
+// ── CLASS CARDS
+const grid = document.getElementById('classCardsGrid');
+classData.slice().sort((a,b) => b.count - a.count).forEach(d => {
+  const pct = (d.count / maxCount * 100).toFixed(1);
+  let badge = '♻️ Recyclable';
+  let badgeClass = '';
+  if(d.name === 'battery') { badge = '⚠️ Hazardous'; badgeClass = 'amber'; }
+  else if(d.name === 'clothes' || d.name === 'shoes') { badge = '🔁 Upcyclable'; badgeClass = 'blue'; }
+  else if(d.name === 'organic' || d.name === 'biological') { badge = '🌱 Compostable'; }
+  else if(d.name === 'trash') { badge = '🗑️ General Waste'; badgeClass = 'amber'; }
+  grid.innerHTML += `
+    <div class="cclass-card">
+      <span class="cc-emoji">${d.emoji}</span>
+      <div class="cc-name">${d.name.replace('-',' ')}</div>
+      <div class="cc-count">~${d.count >= 1000 ? (d.count/1000).toFixed(1)+'K' : d.count}</div>
+      <div class="cc-label">images</div>
+      <div class="cc-bar-bg"><div class="cc-bar-fill" data-w="${pct}" style="width:0%;"></div></div>
+      <span class="cc-badge ${badgeClass}">${badge}</span>
+    </div>`;
+});
+ 
+// ── ANIMATE BARS
+function animateBars() {
+  document.querySelectorAll('.bar-fill[data-w], .cc-bar-fill[data-w]').forEach(el => {
+    const w = el.getAttribute('data-w');
+    if(!el.getAttribute('animated')) {
+      el.setAttribute('animated','1');
+      setTimeout(() => { el.style.width = w + '%'; }, 100);
+    }
+  });
+}
+const barObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) animateBars(); });
+}, { threshold: 0.2 });
+barObs.observe(barContainer);
+barObs.observe(grid);
+ 
+// ── LINE CHARTS
+function drawLineChart(canvasId, datasets, yMin, yMax) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.offsetWidth * dpr;
+  canvas.height = 240 * dpr;
+  ctx.scale(dpr, dpr);
+ 
+  const W = canvas.offsetWidth;
+  const H = 240;
+  const pad = { top:20, right:20, bottom:40, left:50 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top - pad.bottom;
+  const epochs = 20;
+ 
+  ctx.clearRect(0,0,W,H);
+ 
+  ctx.strokeStyle = 'rgba(0,230,118,0.06)';
+  ctx.lineWidth = 1;
+  for (let i=0; i<=5; i++) {
+    const y = pad.top + (chartH / 5) * i;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + chartW, y); ctx.stroke();
+    const val = (yMax - (yMax - yMin) * i / 5).toFixed(2);
+    ctx.fillStyle = 'rgba(127,169,138,0.7)';
+    ctx.font = '11px DM Sans';
+    ctx.textAlign = 'right';
+    ctx.fillText(val, pad.left - 6, y + 4);
+  }
+ 
+  ctx.fillStyle = 'rgba(127,169,138,0.7)';
+  ctx.font = '11px DM Sans';
+  ctx.textAlign = 'center';
+  for (let i=0; i<epochs; i+=5) {
+    const x = pad.left + (i / (epochs-1)) * chartW;
+    ctx.fillText(i, x, H - pad.bottom + 16);
+  }
+  ctx.fillText(epochs-1, pad.left + chartW, H - pad.bottom + 16);
+ 
+  ctx.save();
+  ctx.translate(12, H/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillStyle = 'rgba(127,169,138,0.6)';
+  ctx.font = '11px DM Sans';
+  ctx.textAlign = 'center';
+  ctx.fillText('Value', 0, 0);
+  ctx.restore();
+  ctx.fillStyle = 'rgba(127,169,138,0.6)';
+  ctx.font = '11px DM Sans';
+  ctx.textAlign = 'center';
+  ctx.fillText('Epochs', pad.left + chartW/2, H - 6);
+ 
+  datasets.forEach(ds => {
+    const pts = ds.data.map((v,i) => ({
+      x: pad.left + (i / (ds.data.length-1)) * chartW,
+      y: pad.top + chartH - ((v - yMin) / (yMax - yMin)) * chartH
+    }));
+ 
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pad.top + chartH);
+    pts.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.lineTo(pts[pts.length-1].x, pad.top + chartH);
+    ctx.closePath();
+    ctx.fillStyle = ds.areaColor;
+    ctx.fill();
+ 
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    pts.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.strokeStyle = ds.color;
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+ 
+    const last = pts[pts.length-1];
+    ctx.beginPath();
+    ctx.arc(last.x, last.y, 4, 0, Math.PI*2);
+    ctx.fillStyle = ds.color;
+    ctx.fill();
+  });
+ 
+  let lx = pad.left;
+  datasets.forEach(ds => {
+    ctx.fillStyle = ds.color;
+    ctx.fillRect(lx, 6, 18, 3);
+    ctx.fillStyle = 'rgba(200,230,210,0.8)';
+    ctx.font = '11px DM Sans';
+    ctx.textAlign = 'left';
+    ctx.fillText(ds.label, lx + 22, 14);
+    lx += ctx.measureText(ds.label).width + 46;
+  });
+}
+ 
+const trainAcc  = [0.850,0.870,0.869,0.877,0.877,0.875,0.879,0.883,0.884,0.890,0.891,0.886,0.885,0.890,0.892,0.891,0.893,0.896,0.893,0.952];
+const valAcc    = [0.840,0.839,0.861,0.855,0.866,0.856,0.855,0.855,0.860,0.867,0.865,0.845,0.866,0.855,0.869,0.856,0.855,0.865,0.860,0.861];
+const trainLoss = [0.500,0.430,0.421,0.412,0.383,0.376,0.365,0.365,0.367,0.350,0.320,0.315,0.322,0.310,0.302,0.310,0.307,0.308,0.300,0.290];
+const valLoss   = [0.400,0.388,0.360,0.362,0.362,0.337,0.375,0.360,0.360,0.355,0.349,0.368,0.372,0.372,0.360,0.355,0.358,0.360,0.355,0.345];
+ 
+setTimeout(() => {
+  drawLineChart('accChart', [
+    { data:trainAcc, color:'#29b6f6', areaColor:'rgba(41,182,246,0.08)', label:'Train Accuracy' },
+    { data:valAcc,   color:'#ffab40', areaColor:'rgba(255,171,64,0.06)',  label:'Validation Accuracy' }
+  ], 0.83, 0.97);
+ 
+  drawLineChart('lossChart', [
+    { data:trainLoss, color:'#29b6f6', areaColor:'rgba(41,182,246,0.08)', label:'Train Loss' },
+    { data:valLoss,   color:'#ffab40', areaColor:'rgba(255,171,64,0.06)',  label:'Validation Loss' }
+  ], 0.25, 0.53);
+}, 300);
+ 
+window.addEventListener('resize', () => {
+  setTimeout(() => {
+    drawLineChart('accChart', [
+      { data:trainAcc, color:'#29b6f6', areaColor:'rgba(41,182,246,0.08)', label:'Train Accuracy' },
+      { data:valAcc,   color:'#ffab40', areaColor:'rgba(255,171,64,0.06)',  label:'Validation Accuracy' }
+    ], 0.83, 0.97);
+    drawLineChart('lossChart', [
+      { data:trainLoss, color:'#29b6f6', areaColor:'rgba(41,182,246,0.08)', label:'Train Loss' },
+      { data:valLoss,   color:'#ffab40', areaColor:'rgba(255,171,64,0.06)',  label:'Validation Loss' }
+    ], 0.25, 0.53);
+  }, 100);
+});
+</script>
+</body>
+</html>
